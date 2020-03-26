@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="../img/favicon.png" sizes="64x64" type="image/png">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Redister for an event</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="../css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <style>
+        .select-dropdown {
+            margin-bottom: 0px !important;
+        }
+    </style>
+
+    <!-- Modal -->
+    <div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header pb-0">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body pt-0">
+                    <p class="h5 text-center font-weight-normal">Heart Health São Paulo</p>
+                    <div class="text-center">
+                        <img src="../img/charity/heart-health-sao-paulo-logo.png" class="rounded my-4"
+                            alt="Charity Organization logo" style="width: 200px;">
+                    </div>
+                    <div class="container col-10">
+                        <p>
+                            For over 50 years, Heart Health São Paulo has been dedicated to saving lives by
+                            making a difference to the heart health of our people.
+                        </p>
+                        <p>
+                            Donations help us fund
+                            valuable research, develop guidelines for health professionals,
+                            support patient care
+                            and help Paulistas to live healthier lifestyles.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+
+    <div class="container-fluid px-0">
+
+        <!-- Header -->
+        <nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
+
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
+                            href="RunnerMenu.html">Back <span class="sr-only">(current)</span></a>
+                    </li>
+                    <p class="h3 text-white ml-2 pt-2" href="#">MARATHON SKILLS 2015</p>
+                </ul>
+            </div>
+        </nav>
+        <!-- /Header -->
+
+        <!-- Main Container -->
+        <main>
+            <div class="justify-content-center align-items-center bg-white">
+                <div class="container-fluid">
+                    <div class="container text-center col-sm-12 col-md-8 col-lg-8 col-xl-8">
+                        <h1 class="text-center font-weight-normal dark-grey mt-3">Register for an event</h1>
+                        <p class="h5 font-weight-normal text-center">Please fill out all of the following information to
+                            register in the Skills Marathon 2015 beign held in Sao Paulo, Brazil. You will be contacted
+                            after
+                            you have registred to organize payment and other details.
+                        </p>
+                    </div>
+                    <div class="row mt-4">
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                        <!-- Main block: inputs&buttons -->
+                        <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8 row pr-0">
+                            <!-- Left column -->
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <form action="">
+                                    <p class="h3 mid-grey text-center">Competition events</p>
+                                    <!-- Inputs -->
+                                    <div class="row">
+                                        <div class="col-md-1 col-lg-2 col-xl-1"></div>
+                                        <div class="md-form col-md-11 col-lg-10 col-xl-11 my-1">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input col-12" id="full">
+                                                <label class="form-check-label" for="full">42km Full marathon
+                                                    ($145)</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input col-12" id="half">
+                                                <label class="form-check-label" for="half">21km Half marathon
+                                                    ($75)</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input col-12" id="fun">
+                                                <label class="form-check-label" for="fun">5km Fun run ($20)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="h3 mid-grey text-center mt-5">Sponsorship details</p>
+                                    <!-- Inputs -->
+                                    <div class="row">
+                                        <div class="col-md-1 col-lg-2 col-xl-1"></div>
+                                        <div class="md-form col-md-11 col-lg-10 col-xl-11 my-1">
+                                            <div class="md-form input-group my-1">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text md-addon">Charity: </span>
+                                                </div>
+                                                <select class="mdb-select md-form col-md-8 col-lg-8 col-xl-8  my-0"
+                                                    searchable="Search here..">
+                                                    <option value="">Andorra</option>
+                                                    <option value="">Argentina</option>
+                                                    <option value="">Australia</option>
+                                                    <option value="">Austria</option>
+                                                    <option value="">Belgium</option>
+                                                    <option value="">Botswana</option>
+                                                    <option value="">Brazil</option>
+                                                    <option value="">Bulgaria</option>
+                                                    <option value="">Central African Republic</option>
+                                                    <option value="">Canada</option>
+                                                    <option value="">Chile</option>
+                                                    <option value="">China</option>
+                                                    <option value="">Ivory Coast</option>
+                                                    <option value="">Cameroon</option>
+                                                    <option value="">Colombia</option>
+                                                </select>
+                                                <!-- Target to raise -->
+                                                <div class="md-form input-group my-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text md-addon">Target to raise: </span>
+                                                    </div>
+                                                    <input type="text" class="form-control col-6" placeholder="$100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Buttons -->
+                                    <div class="row">
+                                        <div class="col-sm-0 col-md-0 col-lg-3 col-xl-2"></div>
+                                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-2">
+                                            <a href="RegistrationConfirmation.html"
+                                                class="btn btn-md btn-block btn-light" role="button">Register</a>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                                            <a href="RunnerMenu.html" class="btn btn-md btn-block btn-light"
+                                                role="button">Cancel</a>
+                                        </div>
+                                        <div class=" col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+                                    </div>
+                            </div>
+                            <!-- Right column -->
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <p class="h3 mid-grey pl-5 text-center">Race kit options</p>
+                                <!-- Inputs -->
+                                <div class="row">
+                                    <div class="col-md-1 col-lg-2 col-xl-1"></div>
+                                    <div class="md-form col-md-11 col-lg-10 col-xl-11 my-1">
+                                        <div class="form-check mb-1">
+                                            <input type="radio" class="form-check-input" id="a" name="radio">
+                                            <label class="form-check-label" for="a"><span
+                                                    class="font-weight-bold">Option A ($0): </span>Runner's bib + RFID
+                                                bracelet.</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input type="radio" class="form-check-input" id="b" name="radio">
+                                            <label class="form-check-label" for="b"><span
+                                                    class="font-weight-bold">Option B ($20): </span>Option A + hat +
+                                                water bottle</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input type="radio" class="form-check-input" id="c" name="radio">
+                                            <label class="form-check-label" for="c"><span
+                                                    class="font-weight-bold">Option C ($45): </span>Option V + T-shirt +
+                                                souvenir booklet.</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="h3 mid-grey pl-5 pt-2 text-center mt-4">Registration cost</p>
+                                <h2 class="display-3 font-weight-bold mid-grey text-center">$185</h2>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                    </div>
+                </div>
+        </main>
+        <!-- /Main Container -->
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer bg-dark-grey mt-4">
+        <!-- Copyright -->
+        <p class="h4 text-white text-center py-3 mb-0">
+            20 days 20 hours and 5 minutes until the race starts!
+        </p>
+        <!-- Copyright -->
+    </footer>
+    <!-- Footer -->
+
+    <!-- SCRIPTS -->
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="../js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="../js/mdb.js"></script>
+
+    <script>
+        // Material Select Initialization
+        $(document).ready(function () {
+            $('.mdb-select').materialSelect();
+        });
+    </script>
+</body>
+
+</html>
