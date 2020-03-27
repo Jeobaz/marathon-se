@@ -1,0 +1,73 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 80px;
+    /* Margin bottom by footer height */
+}
+
+.light-grey {
+    color: rgb(235, 235, 235);
+}
+
+.bg-light-grey {
+    background-color: rgb(235, 235, 235);
+}
+
+.mid-grey {
+    color: rgb(180, 180, 180);
+}
+
+.bg-mid-grey {
+    background-color: rgb(180, 180, 180);
+}
+
+.dark-grey {
+    color: rgb(80, 80, 80);
+}
+
+.bg-dark-grey {
+    background-color: rgb(80, 80, 80);
+}
+
+.btn-lg {
+    text-transform: unset !important;
+    font-size: 1.25rem !important;
+}
+
+.btn-sm {
+    text-transform: unset !important;
+    font-size: 1rem !important;
+}
+
+.modal-header {
+    border: none;
+}
+
+.btn-outline-grey {
+    border: 2px solid rgb(180, 180, 180) !important;
+    background-color: transparent !important;
+    color: rgb(180, 180, 180) !important;
+}
+
+@media (max-width: 563px) {
+    footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 88px !important;
+        /* Set the fixed height of the footer here */
+        line-height: 88px !important;
+    }
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    /* Set the fixed height of the footer here */
+    line-height: 60px;
+}

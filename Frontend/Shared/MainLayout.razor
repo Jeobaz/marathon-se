@@ -1,16 +1,39 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
+<div class="container-fluid px-0">
+
+    @Body
+
+    <footer class="page-footer bg-dark-grey mt-4">
+        <p class="h4 text-white text-center py-3 mb-0">
+            @interval.Days days @interval.Hours hours and @interval.Minutes minutes until the race starts!
+        </p>
+        <button @onclick="UpdateTime"> Update</button>
+    </footer>
 </div>
 
-<div class="main">
-    <div class="top-row px-4 auth">
-        <LoginDisplay />
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+@code {
+    private TimeSpan interval;
+    private DateTime sourceDate = new DateTime(2015, 5, 9, 6, 0, 0);
 
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UpdateTime();
+        }
+    }
+
+
+
+    public async Task UpdateTime()
+    {
+        while (true)
+        {
+            interval = DateTime.Now - sourceDate;
+            StateHasChanged();
+            await Task.Delay(TimeSpan.FromSeconds(1));
+        }
+    }
+}
