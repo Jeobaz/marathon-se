@@ -31,6 +31,22 @@ namespace Backend.Controllers
                                         .ToListAsync();
         }
 
+        // GET: api/regrunners
+        [HttpGet("regrunners")]
+        public async Task<ActionResult<IEnumerable<Runner>>> GetRegRunner()
+        {
+
+            return await _context.Runner.Include(x => x.Registration)
+                                            .ThenInclude(reg => reg.RegistrationEvent)
+                                        .Include(x => x.Registration)
+                                            .ThenInclude(x => x.Charity)
+                                        .Include(x => x.EmailNavigation)
+                                        .Where(x => x.Registration.Count == 1)
+                                        .Where(x => x.Registration.First().RegistrationEvent.Count == 1)
+                                        .AsNoTracking()
+                                        .ToListAsync();
+        }
+
         // GET: api/Runners/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Runner>> GetRunner(int id)

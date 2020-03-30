@@ -1,0 +1,1 @@
+Scaffold-DbContext 'Data Source=ALEKSEY;Initial Catalog=marathon-se;Integrated Security=True' Microsoft.EntityFrameworkCore.SqlServer -DataAnnotations -ContextDir Data -OutputDir Models

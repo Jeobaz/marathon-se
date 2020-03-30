@@ -11792,7 +11792,9 @@ label.btn input[type="checkbox"]:disabled:checked + label:after {
 
 select {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  display: none !important; }
+  /*display: none !important;*/ 
+
+}
   select.browser-default {
     display: block !important; }
   select:disabled {

@@ -1,38 +1,43 @@
 ﻿@page "/sponsorrunner"
-
+@using Backend.Models;
+@using Frontend.ViewModels;
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Microsoft.Extensions.Options;
+@using Frontend.Data;
+@inject IOptions<BackendDomain> config
 <!-- Modal -->
-<div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header pb-0">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body pt-0">
-                <p class="h5 text-center font-weight-normal">Heart Health São Paulo</p>
-                <div class="text-center">
-                    <img src="../img/charity/heart-health-sao-paulo-logo.png" class="rounded my-4"
-                         alt="Charity Organization logo" style="width: 200px;">
+@if (Sponsor.Register != null)
+{
+    <div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header pb-0">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="container col-10">
-                    <p>
-                        For over 50 years, Heart Health São Paulo has been dedicated to saving lives by
-                        making a difference to the heart health of our people.
+                <div class="modal-body pt-0">
+                    <p class="h5 text-center font-weight-normal">
+                        @Sponsor.Register.Charity.CharityName
                     </p>
-                    <p>
-                        Donations help us fund
-                        valuable research, develop guidelines for health professionals,
-                        support patient care
-                        and help Paulistas to live healthier lifestyles.
-                    </p>
-                </div>
+                    <div class="text-center">
+                        <img src="@string.Format("{0}{1}", NavigationManager.BaseUri, $"img/charity/{Sponsor.Register.Charity.CharityLogo}")" class="rounded my-4"
+                             alt="Charity Organization logo" style="width: 200px;">
+                    </div>
+                    <div class="container col-10">
+                        @foreach (var pText in Sponsor.Register.Charity.CharityDescription.Split('\n'))
+                        {
+                            <p>@pText</p>
+                        }
+                    </div>
 
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 <!-- Modal -->
 <!-- Header -->
 <nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
@@ -66,112 +71,213 @@
                     sponsor them for. Thank you for your support of the runners and their charities!
                 </p>
             </div>
-            <div class="row">
-                <!-- Buffer column -->
-                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
-                <div class="col-sm-12 col-md-10 col-lg-8 col-xl-8">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
-                            <p class="h4 mid-grey">Sponsorship details</p>
-                            <form action="">
+            <EditForm Model="@Sponsor" OnValidSubmit="PayNow" >
+                <div class="row">
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+                    <div class="col-sm-12 col-md-10 col-lg-8 col-xl-8">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
+                                <p class="h4 mid-grey">Sponsorship details</p>
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
                                 <!-- Name -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Your Name: </span>
                                     </div>
-                                    <input type="text" aria-label="First name" class="form-control"
-                                           placeholder="Your Name">
+                                    <InputText @bind-Value="Sponsor.Name" class="form-control" placeholder="Your Name" />
                                 </div>
+
                                 <!-- Runner -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Runner: </span>
                                     </div>
-                                    <select class="mdb-select md-form col-lg-9 col-xl-10 my-0"
-                                            searchable="Search here..">
-                                        <option value="" disabled selected>Choose your country</option>
-                                        <option value="1">USA</option>
-                                        <option value="2">Germany</option>
-                                        <option value="3">France</option>
-                                        <option value="3">Poland</option>
-                                        <option value="3">Japan</option>
-                                    </select>
+                                    <InputSelect Id="RunnerChoice" @bind-Value="RunnerId"
+                                                 class="custom-select col-lg-9 col-xl-10 my-0">
+                                        @if (allRunners.Count == 0)
+                                        {
+                                            <option value="0">Loading...</option>
+                                        }
+                                        else
+                                        {
+                                            foreach (var el in allRunners)
+                                            {
+
+                                                if (el.RunnerId == allRunners[0].RunnerId)
+                                                {
+                                                    <option value="@el.RunnerId" selected>
+                                                        @el.EmailNavigation.LastName, @el.EmailNavigation.FirstName -
+                                                        @el.Registration.First().RegistrationEvent.First().BibNumber (@el.CountryCode)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@el.RunnerId">
+                                                        @el.EmailNavigation.LastName, @el.EmailNavigation.FirstName -
+                                                        @el.Registration.First().RegistrationEvent.First().BibNumber (@el.CountryCode)
+                                                    </option>
+                                                }
+                                            }
+                                        }
+                                    </InputSelect>
                                 </div>
+
                                 <!-- Name on Card -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Name on Card: </span>
                                     </div>
-                                    <input type="text" aria-label="First name" class="form-control"
-                                           placeholder="Credit card holder">
+                                    <InputText @bind-Value="Sponsor.NameOnCard" class="form-control" placeholder="Credit card holder" />
                                 </div>
                                 <!-- Credit Card # -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Credit Card #: </span>
                                     </div>
-                                    <input type="text" aria-label="First name" class="form-control"
-                                           placeholder="1234 1234 1234 1234">
-                                </div>
-                                <!-- Name on Card -->
-                                <div class="md-form input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text md-addon">Expiry Date: </span>
-                                    </div>
-                                    <input type="text" aria-label="First name"
-                                           class="form-control col-2 mr-2 my-0" placeholder="01">
-                                    <input type="text" aria-label="First name col-1  my-0" class="form-control"
-                                           placeholder="2017">
+                                    <InputText @bind-Value="Sponsor.CreditCard" class="form-control" placeholder="1234 1234 1234 1234" />
                                 </div>
                                 <!-- CVC -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">CVC: </span>
                                     </div>
-                                    <input type="text" aria-label="First name"
-                                           class="form-control col-2 mr-2 my-0" placeholder="123">
+                                    <InputText @bind-Value="Sponsor.CVC" class="form-control" placeholder="123" />
                                 </div>
-                            </form>
-                        </div>
-                        <!-- Buffer column -->
-                        <div class="col-sm-0 col-md-0 col-lg-3 col-xl-3"></div>
-                        <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 text-center">
-                            <p class="h4 mid-grey">Charity</p>
-                            <p class="h5 mid-grey font-weight-light text-dark">
-                                Save The Cats Fund
-                                <!-- Button trigger modal -->
-                                <button id="modalActivate" type="button" class="btn btn-sm btn-flat px-1"
-                                        data-toggle="modal" data-target="#exampleModalPreview">
-                                    <i class="fas fa-2x fa-info-circle"></i>
-                                </button>
-                            </p>
-                            <p class="h4 mid-grey mt-4">Amount to donate</p>
-                            <h2 class="display-3 font-weight-bold mid-grey">$50</h2>
-                            <div class="container row justify-content-center mx-0">
-                                <button type="button" class="btn btn-sm btn-outline-grey px-3 pt-1 mt-0">
-                                    <i class="fas fa-minus color-black"></i>
-                                </button>
-                                <input class="form-control w-25 align-bottom" type="text">
-                                <button type="button" class="btn btn-sm btn-outline-grey px-3 pt-0 mt-0">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+
                             </div>
-                            <div class="container justify-content-center row mx-0">
-                                <a type="button" class="btn btn-md btn-light"
-                                   href="SponsorshipConfirmation.html">Pay now</a>
-                                <a type="button" class="btn btn-md btn-light" href="MainScreen.html">Cancel</a>
+                            <!-- Buffer column -->
+                            <div class="col-sm-0 col-md-0 col-lg-3 col-xl-3"></div>
+                            <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 text-center">
+                                <p class="h4 mid-grey">Charity</p>
+
+                                <p class="h5 mid-grey font-weight-light text-dark">
+                                    @if (Sponsor.Register == null)
+                                    {
+                                        <span>Empty</span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            @Sponsor.Register.Charity.CharityName
+                                            <!-- Button trigger modal -->
+                                            <button id="modalActivate" type="button" class="btn btn-sm btn-flat px-1"
+                                                    data-toggle="modal" data-target="#exampleModalPreview">
+                                                <i class="fas fa-2x fa-info-circle"></i>
+                                            </button>
+                                        </span>
+                                    }
+                                </p>
+                                <p class="h4 mid-grey mt-4">Amount to donate</p>
+                                <h2 class="display-3 font-weight-bold mid-grey">$@Sponsor.Amount</h2>
+                                <div class="container row justify-content-center mx-0">
+                                    <button type="button" class="btn btn-sm btn-outline-grey px-3 pt-1 mt-0" @onclick="MinusAmount">
+                                        <i class="fas fa-minus color-black"></i>
+                                    </button>
+                                    <InputNumber disabled class="form-control w-25 align-bottom" @bind-Value="Sponsor.Amount" step="10" />
+                                    <button type="button" class="btn btn-sm btn-outline-grey px-3 pt-0 mt-0" @onclick="PlusAmount">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                @* href="SponsorshipConfirmation.html" *@
+                                <div class="container justify-content-center row mx-0">
+                                    <button type="submit" class="btn btn-md btn-light">
+                                        Pay now
+                                    </button>
+                                    <a type="button" class="btn btn-md btn-light" href="/">Cancel</a>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
                 </div>
-                <!-- Buffer column -->
-                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
-            </div>
+            </EditForm>
         </div>
     </div>
 </main>
 <!-- /Main Container -->
 
 @code {
+    public SponsorRunnerView Sponsor { get; set; }
+    private Runner _runner = new Runner();
+    private string RunnerId
+    {
+        get => _runner.RunnerId.ToString();
+        set
+        {
+            var temp = int.Parse(value);
+            _runner = allRunners.Single(x => x.RunnerId == temp);
+            Sponsor.Register = _runner.Registration.First();
+            StateHasChanged();
+        }
+    }
+    private List<Runner> _allrunners;
+
+    public List<Runner> allRunners
+    {
+        get => _allrunners;
+        set
+        {
+            _allrunners = value;
+            if (value.Count > 0)
+                RunnerId = value[0].RunnerId.ToString();
+
+        }
+    }
+    private Registration CurrentRegister { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sponsor = new SponsorRunnerView
+        {
+            RunnerId = "0",
+            Amount = 10
+        };
+
+
+        allRunners = new List<Runner>();
+        allRunners = await Http.GetJsonAsync<List<Runner>>($"{config.Value.Domain}/api/Runners/regrunners/");
+    }
+
+    public void PlusAmount()
+    {
+        if (Sponsor.Amount < 1000000)
+            Sponsor.Amount += 10;
+    }
+
+    public void MinusAmount()
+    {
+        if (Sponsor.Amount > 10)
+            Sponsor.Amount -= 10;
+    }
+
+    public void ChangeRunner(ChangeEventArgs e)
+    {
+        var runner = allRunners.Single(x => x.RunnerId == int.Parse(e.Value.ToString()));
+        Sponsor.Register = runner.Registration.First();
+        StateHasChanged();
+    }
+
+    protected override bool ShouldRender()
+    {
+        return base.ShouldRender();
+    }
+
+    public async Task PayNow()
+    {
+        var obj = new Sponsorship
+        {
+            RegistrationId = Sponsor.Register.RegistrationId,
+            SponsorName = Sponsor.Name,
+            Amount = Sponsor.Amount
+        };
+        var sponsor = await Http.PostJsonAsync<Sponsorship>($"{config.Value.Domain}/api/Sponsorships/", obj);
+
+        //var sponsor = await Http.GetJsonAsync<Sponsorship>($"{config.Value.Domain}/api/Sponsorships/14/");
+
+        NavigationManager.NavigateTo($"sponsorconfirmation/{sponsor.SponsorshipId}/");
+    }
 
 }

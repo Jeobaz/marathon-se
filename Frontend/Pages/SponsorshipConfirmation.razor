@@ -1,0 +1,78 @@
+﻿@page "/sponsorconfirmation/{sponsor:int}/"
+@using Backend.Models;
+@inject HttpClient Http
+@using Microsoft.Extensions.Options;
+@using Frontend.Data;
+@inject IOptions<BackendDomain> config
+<!-- Header -->
+<nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
+
+    <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
+                   href="/">Back <span class="sr-only">(current)</span></a>
+            </li>
+            <p class="h3 text-white ml-2 pt-2" href="#">MARATHON SKILLS 2015</p>
+        </ul>
+    </div>
+
+</nav>
+<!-- /Header -->
+<!-- Main Container -->
+<main>
+    @if (Sponsor == null)
+    {
+        <h2>Loading ...</h2>
+    }
+    else
+    {
+        <div class="justify-content-center align-items-center bg-white">
+            <div class="container-fluid">
+                <div class="container text-center col-8">
+                    <h2 class="text-center font-weight-normal dark-grey my-5">Thank you for your sponsorship!</h2>
+                    <p class="h4 font-weight-normal text-center dark-grey">
+                        Thank you for sponsoring a runner in
+                        Marathon Skill 2015!
+                    </p>
+                    <p class="h4 font-weight-normal text-center dark-grey">
+                        Your donation will help out their chosen
+                        charity.
+                    </p>
+                </div>
+                <div class="container text-center">
+                    <h2 class="font-weight-normal my-5 text-dark">
+                        @Sponsor.Registration.Runner.EmailNavigation.FirstName @Sponsor.Registration.Runner.EmailNavigation.LastName
+                        (@Sponsor.Registration.RegistrationEvent.First().BibNumber) from @Sponsor.Registration.Runner.CountryCode</h2>
+                    <h1 class="display-4 font-weight-normal dark-grey">@Sponsor.Registration.Charity.CharityName</h1>
+                    <h1 class="display-1  font-weight-normal dark-grey">$@((int)Sponsor.Amount)</h1>
+                    <a type="button" class="btn btn-lg btn-light mt-4" href="/">Back</a>
+                </div>
+            </div>
+        </div>
+    }
+</main>
+<!-- /Main Container -->
+
+@code {
+
+
+    public Sponsorship Sponsor { get; set; }
+    [Parameter]
+    public int sponsor { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sponsor = await Http.GetJsonAsync<Sponsorship>($"{config.Value.Domain}/api/Sponsorships/{sponsor}/");
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+}
