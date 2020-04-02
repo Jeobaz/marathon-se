@@ -9,6 +9,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore;
 using System.Net.Http;
 using Frontend.Data;
+using Blazored.SessionStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using Frontend.Services;
+using Blazored.Modal;
+
 //using Microsoft.AspNetCore.Blazor.HttpClient;
 namespace Frontend
 {
@@ -27,10 +32,13 @@ namespace Frontend
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-
             services.AddSingleton<HttpClient>();
             services.AddOptions();
             services.Configure<BackendDomain>(Configuration.GetSection("BackendDomain"));
+            services.AddBlazoredSessionStorage();
+            services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+            services.AddSingleton<IUserService, UserService>();
+            services.AddBlazoredModal();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,7 +47,7 @@ namespace Frontend
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                //app.UseDatabaseErrorPage();
             }
             else
             {
@@ -50,15 +58,14 @@ namespace Frontend
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                //endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

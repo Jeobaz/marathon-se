@@ -1,0 +1,114 @@
+﻿@page "/loginscreen"
+
+@using Frontend.Services;
+@using Frontend.Data;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject IUserService userService
+@inject IJSRuntime jsRunTime
+
+
+<Header />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-md-8 col-lg-8 col-xl-8">
+                <h2 class="text-center font-weight-normal dark-grey my-4">Login Form</h2>
+                <p class="h4 font-weight-normal text-center mt-2">
+                    Please log in to the system using your email
+                    address and password
+                </p>
+            </div>
+            <div class="container col-sm-12 col-md-10 col-lg-6 col-xl-4">
+                <EditForm Model="user" OnValidSubmit="ValidateLogin">
+                    <!-- Email -->
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Email: </span>
+                        </div>
+                        <input @bind-value="user.Email" type="text"
+                               class="form-control" placeholder="Enter your email address">
+                    </div>
+                    <!-- Password -->
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text md-addon">Password: </span>
+                        </div>
+
+                        <input @bind-value="user.Password" type="password" aria-label="First name"
+                               class="form-control" placeholder="Password">
+                    </div>
+                    <!-- Buttons field -->
+                    <div class="row">
+                        <div class="col-sm-0 col-md-2 col-lg-2 col-xl-2"></div>
+                        <div class="col-sm-12 col-md-4 col-lg-5 col-xl-4">
+                            <button type="submit" class="btn btn-light btn-block text-dark my-1" >
+                                Sign in
+                            </button>
+                            @*<button @onclick="@(() => Modal.Show<YesNoPrompt>("First modal"))" type="button" class="btn btn-light btn-block text-dark my-1" >
+                                    Sign in
+                            </button>*@
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-5 col-xl-4">
+                            <a class="btn btn-light btn-block text-dark my-1" href="/">Cancel</a>
+                        </div>
+                    </div>
+                    <h3>
+                        @LoginMessage
+                    </h3>
+                    <!-- /Buttons field -->
+                </EditForm>
+
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+
+@code {
+
+    private User user;
+    private string LoginMessage = string.Empty;
+
+    protected override Task OnInitializedAsync()
+    {
+        user = new User();
+        return base.OnInitializedAsync();
+    }
+
+    public async Task<bool> ValidateLogin()
+    {
+        var returnedUser = await userService.LoginAsync(user);
+
+        if (returnedUser.Email != null)
+        {
+            await sessionStorage.SetItemAsync("email", returnedUser.Email);
+            await sessionStorage.SetItemAsync("role", returnedUser.Role);
+
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
+
+            switch(returnedUser.RoleId)
+            {
+                case "R":
+                    NavigationManager.NavigateTo("/runnermenu");
+                    break;
+                case "C":
+                    NavigationManager.NavigateTo("/coordinatormenu");
+                    break;
+                case "A":
+                    NavigationManager.NavigateTo("/adminmenu");
+                    break;
+            }
+        }
+        else
+            LoginMessage = "Invalid username or password";
+
+        StateHasChanged();
+
+        return await Task.FromResult(true);
+    }
+}

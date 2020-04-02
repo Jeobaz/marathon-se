@@ -1,33 +1,13 @@
 ﻿@page "/listofcharities"
-@using Backend.Models;
 @using Frontend.ViewModels;
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @using Microsoft.Extensions.Options;
 @using Frontend.Data;
 @inject IOptions<BackendDomain> config
-<!-- Header -->
-<nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
 
-    <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
-                   href="/">
-                    Back
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <p class="h3 text-white ml-2 pt-2" href="/">MARATHON SKILLS 2015</p>
-        </ul>
-    </div>
-</nav>
-<!-- /Header -->
+<Header />
+
 <!-- Main Container -->
 <main class="bg-white">
     <div class="container-fluid">

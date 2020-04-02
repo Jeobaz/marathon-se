@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Newtonsoft.Json;
+using Backend.Data;
 
 namespace Backend
 {
@@ -34,6 +35,10 @@ namespace Backend
             services.AddMvc(option => option.EnableEndpointRouting = false)
                     .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                     .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
+            services.AddOptions();
+            services.Configure<JWTSettings>(Configuration.GetSection("JWTSettings"));
+
             //services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 

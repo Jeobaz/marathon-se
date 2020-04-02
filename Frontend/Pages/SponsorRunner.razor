@@ -39,26 +39,9 @@
     </div>
 }
 <!-- Modal -->
-<!-- Header -->
-<nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
 
-    <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
-                   href="/">Back <span class="sr-only">(current)</span></a>
-            </li>
-            <!--<a class="h3 text-white ml-2 pt-2" href="/">MARATHON SKILLS 2015</a>-->
-        </ul>
-        <a class="h3 text-white ml-2 pt-2" href="/">MARATHON SKILLS 2015</a>
-    </div>
-</nav>
-<!-- /Header -->
+<Header />
+
 <!-- Main Container -->
 <main>
     <div class="justify-content-center align-items-center bg-white">
@@ -137,6 +120,16 @@
                                         <span class="input-group-text md-addon">Credit Card #: </span>
                                     </div>
                                     <InputText @bind-Value="Sponsor.CreditCard" class="form-control" placeholder="1234 1234 1234 1234" />
+                                </div>
+                                <!-- Expires Date -->
+                                <div class="md-form input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Expiry Date: </span>
+                                    </div>
+                                    <InputText @bind-Value="Sponsor.ExpiryDate.Month" class="form-control col-2 mr-2 my-0"
+                                               placeholder="@DateTime.Now.Month"
+                                               />
+                                    <InputText @bind-Value="Sponsor.ExpiryDate.Year" class="form-control" placeholder="@DateTime.Now.Year" />
                                 </div>
                                 <!-- CVC -->
                                 <div class="form-group input-group">
@@ -233,7 +226,8 @@
         Sponsor = new SponsorRunnerView
         {
             RunnerId = "0",
-            Amount = 10
+            Amount = 10,
+            ExpiryDate = new Models.ExpiryDate()
         };
 
 
@@ -260,9 +254,9 @@
         StateHasChanged();
     }
 
-    protected override bool ShouldRender()
+    public void ChangeMonth(ChangeEventArgs e)
     {
-        return base.ShouldRender();
+        var val = e.Value.ToString();
     }
 
     public async Task PayNow()
