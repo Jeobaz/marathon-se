@@ -1,5 +1,5 @@
 ﻿@page "/runnermenu"
-
+@inject IJSRuntime JSRuntime
 <!-- Modal -->
 <div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
      aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
@@ -35,44 +35,55 @@
 
 <Header />
 
-<!-- Main Container -->
-<main>
-    <div class="justify-content-center align-items-center bg-white">
-        <div class="container-fluid">
-            <h2 class="text-center font-weight-normal dark-grey my-5">Runner menu</h2>
-            <div class="row mt-3">
-                <div class="col-sm-0 col-md-0 col-lg-2 col-xl-3"></div>
-                <div class="container col-sm-12 col-md-12 col-lg-4 col-xl-3 text-center">
-                    <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
-                       href="RegisterRunner.html">Register for an event</a>
+<AuthorizeView Roles="R">
+    <Authorized>
+        <!-- Main Container -->
+        <main>
+            <div class="justify-content-center align-items-center bg-white">
+                <div class="container-fluid">
+                    <h2 class="text-center font-weight-normal dark-grey my-5">Runner menu</h2>
+                    <div class="row mt-3">
+                        <div class="col-sm-0 col-md-0 col-lg-2 col-xl-3"></div>
+                        <div class="container col-sm-12 col-md-12 col-lg-4 col-xl-3 text-center">
+                            <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
+                               href="reigsterforevent">Register for an event</a>
 
-                    <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
-                       href="SponsorRunner.html">Edit your profile</a>
+                            <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
+                               href="editrunnerprofile">Edit your profile</a>
 
-                    <button type="button" class="btn btn-lg btn-light btn-block my-2 py-4" data-toggle="modal"
-                            data-target="#exampleModalPreview">
-                        Contact information
-                    </button>
+                            <button type="button" class="btn btn-lg btn-light btn-block my-2 py-4" data-toggle="modal"
+                                    data-target="#exampleModalPreview">
+                                Contact information
+                            </button>
 
+                        </div>
+                        <div class="container col-sm-12 col-md-12 col-lg-4 col-xl-3 text-center">
+                            <button type="button" class="btn btn-lg btn-light btn-block my-2 py-4">
+                                My race
+                                results
+                            </button>
+
+                            <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
+                               href="ListOfCharities.html">My sponsorship</a>
+
+
+                        </div>
+                        <div class="col-sm-0 col-md-0 col-lg-2 col-xl-3"></div>
+                    </div>
                 </div>
-                <div class="container col-sm-12 col-md-12 col-lg-4 col-xl-3 text-center">
-                    <button type="button" class="btn btn-lg btn-light btn-block my-2 py-4">
-                        My race
-                        results
-                    </button>
-
-                    <a type="button" class="btn btn-lg btn-light btn-block my-2 py-4"
-                       href="ListOfCharities.html">My sponsorship</a>
-
-
-                </div>
-                <div class="col-sm-0 col-md-0 col-lg-2 col-xl-3"></div>
             </div>
-        </div>
-    </div>
-</main>
-<!-- /Main Container -->
+        </main>
+        <!-- /Main Container -->
+    </Authorized>
+    <NotAuthorized>
+        <h3>You don't have access</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Runner menu");
+    }
 }

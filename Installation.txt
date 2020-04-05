@@ -1,1 +1,4 @@
-PM> Update-Database
+1. Change in project "Backend" in appsettings.json ConnectionString
+2. Execute this command:
+    PM> Update-Database
+3. Import SQL data from folder "SQL"

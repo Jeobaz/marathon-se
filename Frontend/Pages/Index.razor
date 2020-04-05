@@ -1,4 +1,6 @@
 ﻿@page "/"
+@inject NavigationManager NavManager
+@using System.Security.Claims
 <!-- Header -->
 <section class="bg-dark-grey" style="min-height: 15vh; flex:1;">
     <h1 class="text-center font-weight-bold text-white pt-3 mb-4">MARATHON SKILLS 2015</h1>
@@ -13,7 +15,7 @@
             <a type="button" class="btn btn-lg col-sm-12 col-md-8 col-lg-6 col-xl-3 btn-light my-3"
                href="checkrunner">
                 I want to be a
-                runne
+                runner
             </a>
             <br />
             <a type="button" class="btn btn-lg col-sm-12 col-md-8 col-lg-6 col-xl-3 btn-light my-3"
@@ -26,11 +28,42 @@
                href="findoutmore">I want to find out more</a>
             <br />
         </div>
-        <div class="container col-sm-12 col-md-12 col-lg-10 col-xl-5 mt-5">
-            <a type="button" class="btn col-sm-5 col-md-3 col-lg-3 col-xl-3 btn-light my-3 float-right"
-               href="loginscreen">Login</a>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="container col-sm-12 col-md-12 col-lg-10 col-xl-5 mt-5">
+                    <button type="button" class="btn col-sm-5 col-md-3 col-lg-3 col-xl-3 btn-light my-3 float-right"
+                            @onclick="(() => Redirect(context))">Menu</button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="container col-sm-12 col-md-12 col-lg-10 col-xl-5 mt-5">
+                    <a type="button" class="btn col-sm-5 col-md-3 col-lg-3 col-xl-3 btn-light my-3 float-right"
+                       href="loginscreen">Login</a>
+                </div>
+
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </section>
 
 <!-- /Main Container -->
+
+@code {
+    public void Redirect(AuthenticationState context)
+    {
+        var role = context.User.Claims.Single(x => x.Type == ClaimTypes.Role).Value;
+
+        switch(role)
+        {
+            case "R":
+                NavManager.NavigateTo("/runnermenu");
+                break;
+            case "A":
+                NavManager.NavigateTo("/coordinatormenu");
+                break;
+            case "C":
+                NavManager.NavigateTo("/adminmenu");
+                break;
+        }
+    }
+}

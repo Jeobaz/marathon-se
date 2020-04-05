@@ -1,0 +1,20 @@
+﻿@page "/reigsterforevent"
+@inject IJSRuntime JSRuntime
+
+
+<AuthorizeView Roles="R" Context="userContext">
+    <Authorized>
+        <RegisterEventMenu State="userContext" />
+    </Authorized>
+    <NotAuthorized>
+        <h3>You don't have access</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Register for event");
+    }
+}

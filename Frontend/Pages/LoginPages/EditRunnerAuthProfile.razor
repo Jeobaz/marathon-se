@@ -1,0 +1,241 @@
+﻿@inject HttpClient Http
+@using Microsoft.Extensions.Options;
+@using Frontend.Data;
+@using Frontend.ViewModels;
+@using Frontend.Services;
+@inject IOptions<BackendDomain> config
+@inject IRunnerService runnerService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<Header UrlBack="runnermenu"/>
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-3">Edit your profile</h1>
+            </div>
+            <div class="row mt-4">
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8">
+                    <EditForm Model="runnerView" OnValidSubmit="ValidEdit">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 text-center">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+                                <span class="text-danger">@messageInfo</span>
+                                <!-- Email -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Email: </span>
+                                    </div>
+                                    <input type="text" class="form-control" readonly value="@State.User.Identity.Name" />
+                                </div>
+
+                                <!-- First Name -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">First Name: </span>
+                                    </div>
+                                    <input type="text" class="form-control" @bind-value="runnerView.FirstName" placeholder="First Name">
+                                </div>
+                                <!-- Last Name -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Last Name: </span>
+                                    </div>
+                                    <input type="text" class="form-control" @bind-value="runnerView.LastName" placeholder="Last Name">
+                                </div>
+                                <!-- Gender -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Gender: </span>
+                                    </div>
+                                    <select class="custom-select form-control"
+                                            @bind="runnerView.GenderId">
+                                        @if (Genders.Count == 0)
+                                        {
+                                            <option value="null" disabled>Loading...</option>
+                                        }
+                                        else
+                                        {
+                                            foreach (var gender in Genders)
+                                            {
+                                                <option value="@gender.Gender1">@gender.Gender1</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <!-- Date of Brth -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Date of birth: </span>
+                                    </div>
+                                    <input placeholder="Selected date" type="date" @bind="runnerView.DateBirth" class="form-control">
+                                </div>
+                                <!-- Country -->
+                                <div class="md-form input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Country: </span>
+                                    </div>
+                                    <select class="custom-select"
+                                            @bind="runnerView.CountryId"
+                                            searchable="Search here..">
+                                        @if (Countries.Count == 0)
+                                        {
+                                            <option value="null" disabled>Loading...</option>
+                                        }
+                                        else
+                                        {
+                                            foreach (var country in Countries)
+                                            {
+                                                <option value="@country.CountryCode">@country.CountryName</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 text-center">
+                                <p class="h3 dark-grey text-center ">Change password</p>
+                                <p class="dark-grey text-center ">
+                                    Leave these fields blank, if you don't want to
+                                    change the password.
+                                </p>
+                                <!-- Password -->
+                                <div class="md-form input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Password: </span>
+                                    </div>
+                                    <input type="password" class="form-control" @bind-value="runnerView.Password" placeholder="Password">
+                                </div>
+                                <!-- Password Again -->
+                                <div class="md-form input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Password Again: </span>
+                                    </div>
+                                    <input type="password" class="form-control" @bind-value="runnerView.ConfirmPassword" placeholder="Re-enter password">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center mb-4">
+                            <!-- Buttons field -->
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                                <button class="btn btn-light btn-block text-dark my-1"
+                                        type="submit">Save</button>
+                            </div>
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                                <a class="btn btn-light btn-block text-dark my-1"
+                                   href="runnermenu">Cancel</a>
+                            </div>
+                            <!-- /Buttons field -->
+                        </div>
+                    </EditForm>
+                </div>
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+@code {
+    [Parameter]
+    public AuthenticationState State { get; set; }
+    private EditRunnerView runnerView;
+    private List<Gender> _genders;
+    private List<Country> _countries;
+    public string messageInfo;
+    public Runner runner;
+
+    public List<Gender> Genders
+    {
+        get => _genders;
+        set
+        {
+            _genders = value;
+            if (value.Count > 0)
+            {
+                runnerView.GenderId = value.First().Gender1;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public List<Country> Countries
+    {
+        get => _countries;
+        set
+        {
+            _countries = value;
+            if (value.Count > 0)
+            {
+                runnerView.CountryId = value.First().CountryCode;
+                StateHasChanged();
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        runnerView = new EditRunnerView();
+        Genders = new List<Gender>();
+        Countries = new List<Country>();
+        runner = new Runner();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Genders = await Http.GetJsonAsync<List<Gender>>($"{config.Value.Domain}/api/Genders/");
+        Countries = await Http.GetJsonAsync<List<Country>>($"{config.Value.Domain}/api/Countries/");
+        runner = await Http.PostJsonAsync<Runner>($"{config.Value.Domain}/api/Runners/email/", State.User.Identity.Name);
+        runnerView = new EditRunnerView
+        {
+            FirstName = runner.EmailNavigation.FirstName,
+            LastName = runner.EmailNavigation.LastName,
+            GenderId = runner.Gender,
+            DateBirth = runner.DateOfBirth.Value,
+            CountryId = runner.CountryCode
+        };
+    }
+
+
+    private async Task<bool> ValidEdit()
+    {
+        var email = State.User.Identity.Name;
+        var editedRunner = new Runner
+        {
+            RunnerId = runner.RunnerId,
+            Email = email,
+            EmailNavigation = new User
+            {
+                Email = email,
+                RoleId = "R",
+                FirstName = runnerView.FirstName,
+                LastName = runnerView.LastName,
+                Password = runner.EmailNavigation.Password
+            },
+            DateOfBirth = runnerView.DateBirth,
+            Gender = runnerView.GenderId,
+            CountryCode = runnerView.CountryId,
+        };
+
+        if (runnerView.Password == runner.EmailNavigation.Password)
+        {
+
+            await runnerService.EditRunnerAsync(editedRunner);
+
+            NavigationManager.NavigateTo("/runnermenu");
+        }
+        else
+            messageInfo = "Invalid password";
+
+        return await Task.FromResult(true);
+    }
+
+}

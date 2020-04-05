@@ -11,7 +11,7 @@
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
                 <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
-                   href="/">Back <span class="sr-only">(current)</span></a>
+                   href="@UrlBack">Back <span class="sr-only">(current)</span></a>
             </li>
             <p class="h3 text-white ml-2 pt-2" href="/">MARATHON SKILLS 2015</p>
         </ul>
@@ -27,6 +27,10 @@
 </nav>
 
 @code {
+    //javascript:history.go(-1)
+    [Parameter]
+    public string UrlBack { get; set; } = "/";
+
     public void Logout()
     {
         ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();

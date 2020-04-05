@@ -1,0 +1,96 @@
+﻿@page "/registerconfirmation"
+@inject IJSRuntime JSRuntime
+
+
+<AuthorizeView Roles="R">
+    <Authorized>
+        <style>
+            html,
+            body {
+                height: 100%;
+            }
+
+            .light-grey {
+                color: rgb(235, 235, 235);
+            }
+
+            .bg-light-grey {
+                background-color: rgb(235, 235, 235);
+            }
+
+            .mid-grey {
+                color: rgb(180, 180, 180);
+            }
+
+            .bg-mid-grey {
+                background-color: rgb(180, 180, 180);
+            }
+
+            .dark-grey {
+                color: rgb(80, 80, 80);
+            }
+
+            .bg-dark-grey {
+                background-color: rgb(80, 80, 80);
+            }
+
+            .btn-lg {
+                text-transform: unset !important;
+                font-size: 1.25rem !important;
+            }
+
+            .btn-sm {
+                text-transform: unset !important;
+                font-size: 1rem !important;
+            }
+
+            .modal-header {
+                border: none;
+            }
+
+            .btn-outline-grey {
+                border: 2px solid rgb(180, 180, 180) !important;
+                background-color: transparent !important;
+                color: rgb(180, 180, 180) !important;
+            }
+        </style>
+
+        <div class="container-fluid px-0">
+
+            <Header />
+            <!-- Main Container -->
+            <main>
+                <div class="justify-content-center align-items-center bg-white">
+                    <div class="container-fluid text-center">
+                        <div class="container text-center col-8">
+                            <h2 class="text-center font-weight-normal dark-grey my-5">
+                                Thank you for registering as a runner!
+                            </h2>
+                            <p class="h4 font-weight-normal text-center dark-grey">
+                                Thank you for registering as a runner in
+                                Marathon Skill 2015!
+                            </p>
+                            <p class="h4 font-weight-normal text-center dark-grey">
+                                Your will be contacted soon about
+                                payment.
+                            </p>
+                        </div>
+                        <a href="runnermenu" class="btn btn-light mt-4" role="button">OK</a>
+                    </div>
+
+                </div>
+            </main>
+            <!-- /Main Container -->
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <h3>You don't have access</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Registration confirmation");
+    }
+}

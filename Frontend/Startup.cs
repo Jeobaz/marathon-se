@@ -38,6 +38,7 @@ namespace Frontend
             services.AddBlazoredSessionStorage();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IRunnerService, RunnerService>();
             services.AddBlazoredModal();
         }
 

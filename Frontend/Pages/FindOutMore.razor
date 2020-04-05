@@ -1,5 +1,5 @@
 ﻿@page "/findoutmore"
-
+@inject IJSRuntime JSRuntime
 <Header />
 <!-- Main Container -->
 <main>
@@ -51,5 +51,8 @@
 </main>
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Find out more");
+    }
 }

@@ -31,7 +31,7 @@ namespace Backend.Controllers
                                         .ToListAsync();
         }
 
-        // GET: api/regrunners
+        // GET: api/Runners/regrunners
         [HttpGet("regrunners")]
         public async Task<ActionResult<IEnumerable<Runner>>> GetRegRunner()
         {
@@ -42,7 +42,8 @@ namespace Backend.Controllers
                                             .ThenInclude(x => x.Charity)
                                         .Include(x => x.EmailNavigation)
                                         .Where(x => x.Registration.Count == 1)
-                                        .Where(x => x.Registration.First().RegistrationEvent.Count == 1)
+                                        .Where(x => x.Registration.First().RegistrationEvent.Count > 0 &&
+                                                    x.Registration.First().RegistrationEvent.Any(regEvent => regEvent.EventId.Contains("15")))
                                         .AsNoTracking()
                                         .ToListAsync();
         }
@@ -51,12 +52,26 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Runner>> GetRunner(int id)
         {
-            var runner = await _context.Runner.FindAsync(id);
+            var runner = await _context.Runner.Include(x => x.EmailNavigation)
+                                              .SingleOrDefaultAsync(x => x.RunnerId == id);
 
             if (runner == null)
-            {
                 return NotFound();
-            }
+
+            return runner;
+        }
+
+        // POST: api/Runners/email/
+        [HttpPost("email")]
+        public async Task<ActionResult<Runner>> GetRunnerIdFromEmail([FromBody] string email)
+        {
+            var runner = await _context.Runner.Include(x => x.EmailNavigation)
+                                              .Include(x => x.Registration)
+                                              .AsNoTracking()
+                                              .SingleOrDefaultAsync(x => x.Email == email);
+
+            if (runner == null)
+                return NotFound();
 
             return runner;
         }
@@ -65,18 +80,27 @@ namespace Backend.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRunner(int id, Runner runner)
+        public async Task<IActionResult> PutRunner(int id, [FromBody] Runner runner)
         {
             if (id != runner.RunnerId)
             {
                 return BadRequest();
             }
-
+            //ru
+            _context.Attach(runner);
+            _context.Entry(runner).Reference(x => x.EmailNavigation).IsModified = true;
             _context.Entry(runner).State = EntityState.Modified;
-
+            //var runnerToUpdate = await _context.Runner.SingleAsync(x => x.RunnerId == runner.RunnerId);
             try
             {
-                await _context.SaveChangesAsync();
+                //runnerToUpdate.EmailNavigation.FirstName = runner.EmailNavigation.FirstName;
+                //runnerToUpdate.EmailNavigation.LastName = runner.EmailNavigation.LastName;
+                //runnerToUpdate.CountryCode = runner.CountryCode;
+                //runnerToUpdate.Gender = runner.Gender;
+                //runnerToUpdate.DateOfBirth = runner.DateOfBirth;
+                _context.User.Update(runner.EmailNavigation);
+                _context.Runner.Update(runner);
+                _context.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -96,8 +120,17 @@ namespace Backend.Controllers
         // POST: api/Runners
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<Runner>> PostRunner(Runner runner)
+        //[HttpPost]
+        //public async Task<ActionResult<Runner>> PostRunner(Runner runner)
+        //{
+        //    _context.Runner.Add(runner);
+        //    await _context.SaveChangesAsync();
+
+        //    return CreatedAtAction("GetRunner", new { id = runner.RunnerId }, runner);
+        //}
+        // POST: api/Runners/Register
+        [HttpPost("Register")]
+        public async Task<ActionResult<Runner>> RegisterRunner(Runner runner)
         {
             _context.Runner.Add(runner);
             await _context.SaveChangesAsync();
@@ -106,20 +139,20 @@ namespace Backend.Controllers
         }
 
         // DELETE: api/Runners/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Runner>> DeleteRunner(int id)
-        {
-            var runner = await _context.Runner.FindAsync(id);
-            if (runner == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult<Runner>> DeleteRunner(int id)
+        //{
+        //    var runner = await _context.Runner.FindAsync(id);
+        //    if (runner == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Runner.Remove(runner);
-            await _context.SaveChangesAsync();
+        //    _context.Runner.Remove(runner);
+        //    await _context.SaveChangesAsync();
 
-            return runner;
-        }
+        //    return runner;
+        //}
 
         private bool RunnerExists(int id)
         {

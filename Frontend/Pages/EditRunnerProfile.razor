@@ -1,0 +1,18 @@
+﻿@page "/editrunnerprofile"
+@inject IJSRuntime JSRuntime
+@using Frontend.Pages.LoginPages
+<AuthorizeView Roles="R">
+    <Authorized>
+        <EditRunnerAuthProfile State="context" />
+    </Authorized>
+    <NotAuthorized>
+        <h3>You don't have access</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code { 
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Edit runner profile");
+    }
+}

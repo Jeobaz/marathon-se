@@ -6,37 +6,13 @@
 @using Microsoft.Extensions.Options;
 @using Frontend.Data;
 @inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+@using Frontend.Pages.Modals
+
 <!-- Modal -->
 @if (Sponsor.Register != null)
 {
-    <div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header pb-0">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body pt-0">
-                    <p class="h5 text-center font-weight-normal">
-                        @Sponsor.Register.Charity.CharityName
-                    </p>
-                    <div class="text-center">
-                        <img src="@string.Format("{0}{1}", NavigationManager.BaseUri, $"img/charity/{Sponsor.Register.Charity.CharityLogo}")" class="rounded my-4"
-                             alt="Charity Organization logo" style="width: 200px;">
-                    </div>
-                    <div class="container col-10">
-                        @foreach (var pText in Sponsor.Register.Charity.CharityDescription.Split('\n'))
-                        {
-                            <p>@pText</p>
-                        }
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
+    <CharityInfoModal Charity="Sponsor.Register.Charity" />
 }
 <!-- Modal -->
 
@@ -79,7 +55,7 @@
                                     </div>
                                     <InputSelect Id="RunnerChoice" @bind-Value="RunnerId"
                                                  class="custom-select col-lg-9 col-xl-10 my-0">
-                                        @if (allRunners.Count == 0)
+                                        @if (allRunners == null || allRunners.Count == 0)
                                         {
                                             <option value="0">Loading...</option>
                                         }
@@ -87,21 +63,14 @@
                                         {
                                             foreach (var el in allRunners)
                                             {
-
-                                                if (el.RunnerId == allRunners[0].RunnerId)
-                                                {
-                                                    <option value="@el.RunnerId" selected>
-                                                        @el.EmailNavigation.LastName, @el.EmailNavigation.FirstName -
-                                                        @el.Registration.First().RegistrationEvent.First().BibNumber (@el.CountryCode)
-                                                    </option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="@el.RunnerId">
-                                                        @el.EmailNavigation.LastName, @el.EmailNavigation.FirstName -
-                                                        @el.Registration.First().RegistrationEvent.First().BibNumber (@el.CountryCode)
-                                                    </option>
-                                                }
+                                                <option value="@el.RunnerId">
+                                                    @el.EmailNavigation.LastName, @el.EmailNavigation.FirstName -
+                                                    @(string.Join(", ", el.Registration.First()
+                                                                                       .RegistrationEvent
+                                                                                       .Select(regEvent => $"{regEvent.BibNumber} ({el.CountryCode})"))
+                                                    )
+                                                </option>
+                                                
                                             }
                                         }
                                     </InputSelect>
@@ -230,6 +199,7 @@
             ExpiryDate = new Models.ExpiryDate()
         };
 
+        await JSRuntime.InvokeVoidAsync("setTitle", "Sponsor runner");
 
         allRunners = new List<Runner>();
         allRunners = await Http.GetJsonAsync<List<Runner>>($"{config.Value.Domain}/api/Runners/regrunners/");
@@ -252,11 +222,6 @@
         var runner = allRunners.Single(x => x.RunnerId == int.Parse(e.Value.ToString()));
         Sponsor.Register = runner.Registration.First();
         StateHasChanged();
-    }
-
-    public void ChangeMonth(ChangeEventArgs e)
-    {
-        var val = e.Value.ToString();
     }
 
     public async Task PayNow()

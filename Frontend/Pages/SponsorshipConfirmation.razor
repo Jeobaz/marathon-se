@@ -4,6 +4,7 @@
 @using Microsoft.Extensions.Options;
 @using Frontend.Data;
 @inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
 
 <Header />
 
@@ -31,7 +32,8 @@
                 <div class="container text-center">
                     <h2 class="font-weight-normal my-5 text-dark">
                         @Sponsor.Registration.Runner.EmailNavigation.FirstName @Sponsor.Registration.Runner.EmailNavigation.LastName
-                        (@Sponsor.Registration.RegistrationEvent.First().BibNumber) from @Sponsor.Registration.Runner.CountryCode</h2>
+                        (@Sponsor.Registration.RegistrationEvent.First().BibNumber) from @Sponsor.Registration.Runner.CountryCode
+                    </h2>
                     <h1 class="display-4 font-weight-normal dark-grey">@Sponsor.Registration.Charity.CharityName</h1>
                     <h1 class="display-1  font-weight-normal dark-grey">$@((int)Sponsor.Amount)</h1>
                     <a type="button" class="btn btn-lg btn-light mt-4" href="/">Back</a>
@@ -43,19 +45,13 @@
 <!-- /Main Container -->
 
 @code {
-
-
     public Sponsorship Sponsor { get; set; }
     [Parameter]
     public int sponsor { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Sponsorship confirmation");
         Sponsor = await Http.GetJsonAsync<Sponsorship>($"{config.Value.Domain}/api/Sponsorships/{sponsor}/");
-    }
-
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
     }
 }

@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Frontend.Services
 {
-    public interface IUserService
+    public interface IRunnerService
     {
-        public Task<UserWithToken> LoginAsync(User user);
-
-        public Task<User> GetUserByEmail(string email);
+        public Task<Runner> RegisterRunnerAsync(Runner runner);
+        public Task EditRunnerAsync(Runner runner);
     }
 }

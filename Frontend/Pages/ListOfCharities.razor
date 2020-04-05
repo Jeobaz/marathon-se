@@ -5,7 +5,7 @@
 @using Microsoft.Extensions.Options;
 @using Frontend.Data;
 @inject IOptions<BackendDomain> config
-
+@inject IJSRuntime JSRuntime
 <Header />
 
 <!-- Main Container -->
@@ -47,6 +47,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await JSRuntime.InvokeVoidAsync("setTitle", "List of charities");
         Charities = new List<Charity>();
         Charities = await Http.GetJsonAsync<List<Charity>>($"{config.Value.Domain}/api/Charities/");
     }

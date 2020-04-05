@@ -3,6 +3,7 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = null;
+    ViewBag.Title = "Main Screen";
 }
 
 <!DOCTYPE html>
@@ -12,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="icon" href="~/img/favicon.png" sizes="64x64" type="image/png" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Main Screen</title>
+    <title>@ViewBag.Title</title>
     <base href="~/" />
 
     <!-- Font Awesome -->
@@ -39,7 +40,9 @@
     <script type="text/javascript" src="~/js/popper.min.js"></script>
     <!-- Bootstrap core JavaScript -->
     <script type="text/javascript" src="~/js/bootstrap.min.js"></script>
+    <!-- Custom funtions -->
+    <script type="text/javascript" src="~/js/script.js"></script>
     <!-- MDB core JavaScript -->
-    <script type="text/javascript" src="~/js/mdb.js"></script>
+    @*<script type="text/javascript" src="~/js/mdb.js"></script>*@
 </body>
 </html>

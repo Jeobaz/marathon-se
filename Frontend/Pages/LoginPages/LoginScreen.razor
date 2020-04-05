@@ -6,8 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject IUserService userService
-@inject IJSRuntime jsRunTime
-
+@inject IJSRuntime JSRuntime
 
 <Header />
 
@@ -74,10 +73,10 @@
     private User user;
     private string LoginMessage = string.Empty;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         user = new User();
-        return base.OnInitializedAsync();
+        await JSRuntime.InvokeVoidAsync("setTitle", "Login screen");
     }
 
     public async Task<bool> ValidateLogin()
@@ -87,9 +86,9 @@
         if (returnedUser.Email != null)
         {
             await sessionStorage.SetItemAsync("email", returnedUser.Email);
-            await sessionStorage.SetItemAsync("role", returnedUser.Role);
+            //await sessionStorage.SetItemAsync("role", returnedUser.RoleId);
 
-            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email, returnedUser.RoleId);
 
             switch(returnedUser.RoleId)
             {
@@ -107,7 +106,7 @@
         else
             LoginMessage = "Invalid username or password";
 
-        StateHasChanged();
+        //StateHasChanged();
 
         return await Task.FromResult(true);
     }

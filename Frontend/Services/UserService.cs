@@ -43,9 +43,24 @@ namespace Frontend.Services
 
         }
 
-        public Task<UserWithToken> RegisterAsync()
+        public async Task<User> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            var serializedUser = JsonConvert.SerializeObject(email);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Users/email/");
+            requestMessage.Content = new StringContent(serializedUser);
+
+            requestMessage.Content.Headers.ContentType
+                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
+
+            return await Task.FromResult(returnedUser);
         }
     }
 }

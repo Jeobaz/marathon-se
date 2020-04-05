@@ -1,4 +1,5 @@
 ﻿using Blazored.SessionStorage;
+using Frontend.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
@@ -11,15 +12,17 @@ namespace Frontend.Data
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private ISessionStorageService _sessionStorageService;
-        public CustomAuthenticationStateProvider(ISessionStorageService sessionStorageService)
+        public IUserService _userService { get; set; }
+        public CustomAuthenticationStateProvider(ISessionStorageService sessionStorageService, IUserService userService)
         {
             _sessionStorageService = sessionStorageService;
+            _userService = userService;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             string email = await _sessionStorageService.GetItemAsync<string>("email");
-
+            var userDb = await _userService.GetUserByEmail(email);
 
             ClaimsIdentity identity;
 
@@ -28,6 +31,7 @@ namespace Frontend.Data
                 identity = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, email),
+                    new Claim(ClaimTypes.Role, userDb.RoleId)
                 }, "apiauth_type");
             }
             else
@@ -39,11 +43,12 @@ namespace Frontend.Data
             return await Task.FromResult(new AuthenticationState(user));
         }
 
-        public void MarkUserAsAuthenticated(string email)
+        public void MarkUserAsAuthenticated(string email, string role)
         {
             var identity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, email),
+                new Claim(ClaimTypes.Role, role)
             }, "apiauth_type");
 
             var user = new ClaimsPrincipal(identity);
@@ -54,7 +59,6 @@ namespace Frontend.Data
         public void MarkUserAsLoggedOut()
         {
             _sessionStorageService.RemoveItemAsync("email");
-            _sessionStorageService.RemoveItemAsync("token");
 
             var identity = new ClaimsIdentity();
 

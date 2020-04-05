@@ -45,9 +45,24 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+            user.Password = null;
+            return user;
+        }
+
+        // GET: api/Users/email/
+        [HttpPost("email")]
+        public async Task<ActionResult<User>> GetUserByEmail([FromBody] string email)
+        {
+            var user = await _context.User.SingleOrDefaultAsync(x => x.Email == email);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
 
             return user;
         }
+
         // POST: api/Users/Login
         [HttpPost("Login")]
         public async Task<ActionResult<UserWithToken>> Login([FromBody] User user)
@@ -65,6 +80,34 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.Email)
+                }),
+                Expires = DateTime.UtcNow.AddMonths(3),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            userWithToken.Token = tokenHandler.WriteToken(token);
+
+            return userWithToken;
+        }
+
+        // POST: api/Users/Register
+        [HttpPost("Register")]
+        public async Task<ActionResult<UserWithToken>> Register([FromBody] User user)
+        {
+            await _context.User.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var userWithToken = new UserWithToken(user);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
