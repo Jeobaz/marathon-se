@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Models;
+using Backend.Data;
 
 namespace Backend.Controllers
 {
@@ -46,6 +47,58 @@ namespace Backend.Controllers
                                                     x.Registration.First().RegistrationEvent.Any(regEvent => regEvent.EventId.Contains("15")))
                                         .AsNoTracking()
                                         .ToListAsync();
+        }
+        // POST: api/Runners/ranks
+        [HttpPost("ranks")]
+        public async Task<ActionResult<List<RegEventWithRanks>>> GetGeneralRunk([FromBody] int runnerId)
+        {
+            var runner = await _context.Runner.Include(x => x.Registration)
+                                                    .ThenInclude(reg => reg.RegistrationEvent)
+                                                        .ThenInclude(regEvent => regEvent.Event)
+                                                            .ThenInclude(evnt => evnt.Marathon)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(reg => reg.RegistrationEvent)
+                                                        .ThenInclude(regEvent => regEvent.Event)
+                                                            .ThenInclude(evnt => evnt.EventType)
+                                              .SingleOrDefaultAsync(x => x.RunnerId == runnerId);
+
+            if (runner == null)
+                return NotFound();
+
+            var reg = runner.Registration.First();
+            var regEvents = reg.RegistrationEvent.Where(x => x.RaceTime.HasValue)
+                                                 .Select(x => new RegEventWithRanks
+                                                 {
+                                                     BibNumber = x.BibNumber,
+                                                     EventId = x.EventId,
+                                                     RaceTime = x.RaceTime,
+                                                     Registration = x.Registration,
+                                                     RegistrationId = x.RegistrationId,
+                                                     RegistrationEventId = x.RegistrationEventId,
+                                                     Event = x.Event,
+                                                 })
+                                                 .ToList();
+
+            var ageCat = AgeMapping.GetAgeCategory(runner.DateOfBirth.Value);
+
+            regEvents.ForEach(regEvnt =>
+            {
+                regEvnt.GeneralRank = _context.RegistrationEvent.Where(x => x.RaceTime.HasValue)
+                                                                .Count(x => x.EventId == regEvnt.EventId &&
+                                                                            x.RaceTime < regEvnt.RaceTime) + 1;
+                regEvnt.CatRank = _context.RegistrationEvent.Where(x => x.RaceTime.HasValue)
+                                                            .Where(x => x.EventId == regEvnt.EventId &&
+                                                                        x.RaceTime < regEvnt.RaceTime)
+                                                            .Include(x => x.Registration)
+                                                                .ThenInclude(x => x.Runner)
+                                                            .ToList()
+                                                            .Count(x => x.Registration.Runner.Gender == x.Registration.Runner.Gender &&
+                                                                        AgeMapping.GetAgeCategory(x.Registration.Runner.DateOfBirth.Value) == ageCat) + 1;
+            });
+
+            return regEvents;
+
+
         }
 
         // GET: api/Runners/5
@@ -100,7 +153,7 @@ namespace Backend.Controllers
                 //runnerToUpdate.DateOfBirth = runner.DateOfBirth;
                 _context.User.Update(runner.EmailNavigation);
                 _context.Runner.Update(runner);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {

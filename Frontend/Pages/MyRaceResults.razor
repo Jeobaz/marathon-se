@@ -1,0 +1,122 @@
+﻿@page "/myraceresults"
+@attribute [Authorize(Roles = "R")]
+
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+<Header />
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            @if (runner != null)
+            {
+            <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-4 mb-3">My race results</h1>
+                <p class="h4 font-weight-normal text-center">
+                    This is a list of all of your past race results for
+                    Marathon Skills.<br />
+                    Current rank compares all runners in the event. <br /> Category rank compares in the same
+                    gender and age categories
+                </p>
+                <p class="h4 font-weight-normal text-center mt-3">
+                    <span class="font-weight-bold">Gender: </span> @runner.Gender
+                    <span class="font-weight-bold">Age category:</span> @RunnerAgeMapping(DateTime.Now.Year - runner.DateOfBirth.Value.Year)
+                </p>
+            </div>
+            <div class="row">
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+                <div class="col-sm-12 col-md-10 col-lg-8 col-xl-8 text-center">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="h4 mid-grey">Marathon</th>
+                                    <th scope="col" class="h4 mid-grey">Event</th>
+                                    <th scope="col" class="h4 mid-grey">Time</th>
+                                    <th scope="col" class="h4 mid-grey">Overall Rank</th>
+                                    <th scope="col" class="h4 mid-grey">Category Rank</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (regEvents == null)
+                                {
+                                    <h5>Loading data...</h5>
+                                }
+                                else
+                                {
+                                    foreach (var regEv in regEvents)
+                                    {
+                                        <tr>
+                                            <th scope="row" class="font-weight-bold h5">@regEv.Event.Marathon.YearHeld @regEv.Event.Marathon.CityName</th>
+                                            <td class="font-weight-bold h5 dark-grey">@regEv.Event.EventType.EventTypeName</td>
+                                            <td class="font-weight-bold h5 dark-grey">@(string.Format("{0:%h}h {0:%m}m {0:%s}s", TimeSpan.FromSeconds(regEv.RaceTime.Value)))</td>
+                                            <td class="font-weight-bold h5 dark-grey">#@regEv.GeneralRank</td>
+                                            <td class="font-weight-bold h5 dark-grey">#@regEv.CatRank</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row justify-content-center mt-3 mb-5">
+                        <!-- Buttons field -->
+                        <div class="col-sm-12 col-md-6 col-lg-5 col-xl-3">
+                            <a class="btn btn-light btn-block text-dark my-1" href="14PreviousRaceResults.html">
+                                View
+                                all race results
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+            </div>
+            }
+            else
+            {
+                <h3>Loading data...</h3>
+            }
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private Runner runner;
+    private List<RegEventWithRanks> regEvents;
+
+    public string RunnerAgeMapping(int years)
+    {
+        if (years < 18)
+            return "Under 18";
+        else if (years >= 18 && years < 30)
+            return "18 to 29";
+        else if (years >= 30 && years < 39)
+            return "30 to 39";
+        else if (years >= 40 && years < 55)
+            return "40 to 55";
+        else if (years >= 56 && years < 70)
+            return "56 to 70";
+        else
+            return "Over 70";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var email = (await authenticationStateTask).User.Identity.Name;
+        await JSRuntime.InvokeVoidAsync("setTitle", "My race results");
+        runner = await runnerService.GetRunnerByEmail(email);
+        regEvents = await Http.PostJsonAsync<List<RegEventWithRanks>>($"{config.Value.Domain}/api/Runners/ranks", runner.RunnerId);
+    }
+
+}

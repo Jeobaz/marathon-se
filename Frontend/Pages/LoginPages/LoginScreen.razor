@@ -85,7 +85,7 @@
 
         if (returnedUser.Email != null)
         {
-            await sessionStorage.SetItemAsync("email", returnedUser.Email);
+            await sessionStorage.SetItemAsync("token", returnedUser.Token);
             //await sessionStorage.SetItemAsync("role", returnedUser.RoleId);
 
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email, returnedUser.RoleId);

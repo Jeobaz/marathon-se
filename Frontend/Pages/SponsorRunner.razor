@@ -199,7 +199,7 @@
             ExpiryDate = new Models.ExpiryDate()
         };
 
-        await JSRuntime.InvokeVoidAsync("setTitle", "Sponsor runner");
+        //await JSRuntime.InvokeVoidAsync("setTitle", "Sponsor runner");
 
         allRunners = new List<Runner>();
         allRunners = await Http.GetJsonAsync<List<Runner>>($"{config.Value.Domain}/api/Runners/regrunners/");

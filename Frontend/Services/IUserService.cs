@@ -11,5 +11,9 @@ namespace Frontend.Services
         public Task<UserWithToken> LoginAsync(User user);
 
         public Task<User> GetUserByEmail(string email);
+
+        public Task<User> GetUserByToken(string token);
+
+        public Task<string> GetTokenByUser(User user);
     }
 }

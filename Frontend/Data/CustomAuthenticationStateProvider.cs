@@ -21,16 +21,16 @@ namespace Frontend.Data
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            string email = await _sessionStorageService.GetItemAsync<string>("email");
-            var userDb = await _userService.GetUserByEmail(email);
+            string token = await _sessionStorageService.GetItemAsync<string>("token");
+            var userDb = await _userService.GetUserByToken(token);
 
             ClaimsIdentity identity;
 
-            if (email != null)
+            if (token != null)
             {
                 identity = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, email),
+                    new Claim(ClaimTypes.Name, userDb.Email),
                     new Claim(ClaimTypes.Role, userDb.RoleId)
                 }, "apiauth_type");
             }
@@ -58,7 +58,7 @@ namespace Frontend.Data
 
         public void MarkUserAsLoggedOut()
         {
-            _sessionStorageService.RemoveItemAsync("email");
+            _sessionStorageService.RemoveItemAsync("token");
 
             var identity = new ClaimsIdentity();
 

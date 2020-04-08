@@ -62,5 +62,45 @@ namespace Frontend.Services
 
             return await Task.FromResult(returnedUser);
         }
+
+        public async Task<User> GetUserByToken(string token)
+        {
+            string serializedRefreshRequest = JsonConvert.SerializeObject(token);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Users/user_by_token");
+            requestMessage.Content = new StringContent(serializedRefreshRequest);
+
+            requestMessage.Content.Headers.ContentType
+                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
+
+            return await Task.FromResult(returnedUser);
+        }
+
+        public async Task<string> GetTokenByUser(User user)
+        {
+            string serializedRefreshRequest = JsonConvert.SerializeObject(user);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Users/token_by_user");
+            requestMessage.Content = new StringContent(serializedRefreshRequest);
+
+            requestMessage.Content.Headers.ContentType
+                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedToken = JsonConvert.DeserializeObject<string>(responseBody);
+
+            return await Task.FromResult(returnedToken);
+        }
     }
 }

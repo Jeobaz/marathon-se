@@ -3,24 +3,27 @@
 @inject NavigationManager NavManager
 @using Microsoft.Extensions.Options;
 @using Frontend.Data;
-@using Frontend.ViewModels;
-@using Frontend.Pages.Modals;
+@using Frontend.ViewModels
+@using Frontend.Pages.Modals
+@using Frontend.Services
+@inject IRunnerService runnerService
+
 @inject AuthenticationStateProvider StateProvider
 @inject IOptions<BackendDomain> config
 
-    <div class="container-fluid px-0">
-        @*@InvokeAsync(() => CheckUserRegister(userContext))*@
-        <Header UrlBack="runnermenu" />
-        @if (hasRegister == null)
-        {
-            <h3>Loading page...</h3>
-        }
-        else if(hasRegister.Value)
-        {
-            <h3>You have registration!</h3>
-        }
-        else
-        {
+<div class="container-fluid px-0">
+    @*@InvokeAsync(() => CheckUserRegister(userContext))*@
+    <Header UrlBack="runnermenu" />
+    @if (hasRegister == null)
+    {
+        <h3>Loading page...</h3>
+    }
+    else if (hasRegister.Value)
+    {
+        <h3>You have registration!</h3>
+    }
+    else
+    {
         <!-- Main Container -->
         <main>
             @if (Charities != null && Charities.Count > 0)
@@ -65,8 +68,8 @@
                                                 {
                                                     <div class="custom-control custom-checkbox">
                                                         @*<InputCheckbox class="custom-control-input"
-                                                        id="@($"evnt-{evnt.EventId}")"
-                                                        checked="@(ForEventView.EventData.Contains((evnt.EventId,(int)evnt.Cost)))"/>*@
+                                                            id="@($"evnt-{evnt.EventId}")"
+                                                            checked="@(ForEventView.EventData.Contains((evnt.EventId,(int)evnt.Cost)))"/>*@
                                                         <input type="checkbox" class="custom-control-input"
                                                                id="@($"evnt-{evnt.EventId}")"
                                                                checked="@(ForEventView.EventData.Contains((evnt.EventId, (int)evnt.Cost)))"
@@ -180,8 +183,8 @@
             </EditForm>
         </main>
         <!-- /Main Container -->
-        }
-    </div>
+    }
+</div>
 
 @code {
     [Parameter]

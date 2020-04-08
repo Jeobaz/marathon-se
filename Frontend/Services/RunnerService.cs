@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
 
 namespace Frontend.Services
 {
@@ -26,9 +27,7 @@ namespace Frontend.Services
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Runners/Register/");
             requestMessage.Content = new StringContent(serializedRunner);
-
-            requestMessage.Content.Headers.ContentType
-                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var response = await _httpClient.SendAsync(requestMessage);
 
@@ -45,13 +44,29 @@ namespace Frontend.Services
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"{_config.Value.Domain}/api/Runners/{runner.RunnerId}/");
             requestMessage.Content = new StringContent(serializedRunner);
-
-            requestMessage.Content.Headers.ContentType
-                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var response = await _httpClient.SendAsync(requestMessage);
 
             //var responseBody = await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<Runner> GetRunnerByEmail(string email)
+        {
+            var serializedEmail = JsonConvert.SerializeObject(email);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Runners/email/");
+            requestMessage.Content = new StringContent(serializedEmail);
+
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedRunner = JsonConvert.DeserializeObject<Runner>(responseBody);
+
+            return await Task.FromResult(returnedRunner);
         }
     }
 }

@@ -128,6 +128,80 @@ namespace Backend.Controllers
             return userWithToken;
         }
 
+        // POST: api/Users/user_by_token
+        [HttpPost("user_by_token")]
+        public async Task<ActionResult<User>> GetUserToken([FromBody] string token)
+        {
+            var user = await GetUserByToken(token);
+
+            if (user != null)
+            {
+                return user;
+            }
+
+            return null;
+        }
+
+        private async Task<User> GetUserByToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
+
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+
+                SecurityToken securityToken;
+                var principle = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+
+                JwtSecurityToken jwtSecurityToken = securityToken as JwtSecurityToken;
+
+                if (jwtSecurityToken != null && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var email = principle.FindFirst(ClaimTypes.Name)?.Value;
+
+                    return await _context.User.Where(x => x.Email == email).SingleOrDefaultAsync();
+                }
+            }
+            catch (Exception)
+            {
+                return new User();
+            }
+
+            return new User();
+        }
+
+        // POST: api/Users/token_by_user
+        [HttpPost("token_by_user")]
+        public ActionResult<string> GetToken([FromBody] User user)
+        {
+            return GetTokenByEmail(user.Email);
+        }
+
+        private string GetTokenByEmail(string email)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, email)
+                }),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
         // PUT: api/Users/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.

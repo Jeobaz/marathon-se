@@ -10,5 +10,6 @@ namespace Frontend.Services
     {
         public Task<Runner> RegisterRunnerAsync(Runner runner);
         public Task EditRunnerAsync(Runner runner);
+        public Task<Runner> GetRunnerByEmail(string email);
     }
 }
