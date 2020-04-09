@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="../img/favicon.png" sizes="64x64" type="image/png">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>My race results</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="../css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container-fluid px-0">
+
+        <!-- Header -->
+        <nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark-grey">
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link btn btn-light waves-effect waves-light text-dark px-4"
+                            href="MainScreen.html">Back <span class="sr-only">(current)</span></a>
+                    </li>
+                    <p class="h3 text-white ml-2 pt-2" href="#">MARATHON SKILLS 2015</p>
+                </ul>
+            </div>
+        </nav>
+        <!-- /Header -->
+
+        <!-- Main Container -->
+        <main>
+            <div class="justify-content-center align-items-center bg-white">
+                <div class="container">
+                    <img usemap="#image-map" src="https://www.travismclarke.com/imagemap/image-map-all.png">
+
+                    <map name="image-map">
+                        <area shape="poly" coords="22,22,231,22,264,82,232,143,22,143">
+                        <area shape="poly" coords="233,22,443,22,476,82,442,144,233,143,264,82">
+                        <area shape="poly" coords="445,22,654,22,686,81,654,143,444,143,475,82">
+                        <area shape="poly" coords="655,22,895,22,895,142,655,142,684,82">
+                    </map>
+                </div>
+        </main>
+        <!-- /Main Container -->
+
+        <!-- Footer -->
+        <footer class="page-footer bg-dark-grey mt-4">
+            <!-- Copyright -->
+            <p class="h4 text-white text-center py-3 mb-0">
+                20 days 20 hours and 5 minutes until the race starts!
+            </p>
+            <!-- Copyright -->
+        </footer>
+        <!-- Footer -->
+
+    </div>
+
+    <!-- SCRIPTS -->
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="../js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="../js/mdb.js"></script>
+    <script type="text/javascript" src="../js/node_modules/image-map/dist/image-map.min.js"></script>
+    <script type="module" src="../js/node_modules/image-map/dist/image-map.es.js"></script>
+
+    <script>
+        // Material Select Initialization
+        $(document).ready(function () {
+            $('.mdb-select').materialSelect();
+            $('img[usemap]').imageMap(250);
+        });
+        
+    </script>
+</body>
+
+</html>
