@@ -1,0 +1,156 @@
+﻿@page "/howlongisamarathon"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Header />
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-3">How long is a marathon?</h1>
+            </div>
+            <div class="row mt-4">
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+                <div class="col-sm-12 col-md-10 col-lg-8 col-xl-8">
+                    <div class="row">
+                        @if (CurrentElement != null)
+                        {
+                            <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
+                                <!--TEXT BLOCK-->
+                                <p class="text-center font-weight-bold h1 dark-grey" id='lead'>
+                                    @CurrentElement.Name
+                                </p>
+                                <img src="../img/how-long/@CurrentElement.Picture" class="img-fluid ml-4" alt="" id='pic'>
+                                <p class="dark-grey text-center h5" id='text'>
+                                    @CurrentElement.Text
+                                </p>
+                            </div>
+                        }
+                        <div class="col-sm-0 col-md-0 col-lg-0 col-xl-2"></div>
+                        <div class="col-sm-12 col-md-12 col-lg-7 col-xl-5 text-center">
+                            <ul class="nav nav-tabs nav-justified md-tabs bg-mid-grey" id="myTabJust"
+                                role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="speed-tab" data-toggle="tab" href="#speed"
+                                       role="tab" aria-controls="speed" aria-selected="true">Speed</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="distance-tab" data-toggle="tab" href="#distance"
+                                       role="tab" aria-controls="distance" aria-selected="false">Distance</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content card pt-5">
+                                <div class="tab-pane fade show active tabs" id="speed" role="tabpanel"
+                                     aria-labelledby="speed-tab">
+                                    @foreach (var spdEl in SpeedData)
+                                    {
+                                        <div class="row mb-3" @onclick="(() => SelectElement(spdEl.Name))">
+                                            <img src="../img/how-long/@spdEl.Picture" alt="" class="ml-4"
+                                                 style="width: 150px;">
+                                            <p class="h3 font-weight-normal my-auto ml-4">@spdEl.Name</p>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="tab-pane fade tabs" id="distance" role="tabpanel"
+                                     aria-labelledby="distance-tab">
+                                    @foreach (var disEl in DistanceData)
+                                    {
+                                        <div class="row mb-3" @onclick="(() => SelectElement(disEl.Name))">
+                                            <img src="../img/how-long/@disEl.Picture" alt="" class="ml-4"
+                                                 style="width: 150px;">
+                                            <p class="h3 font-weight-normal my-auto ml-4">@disEl.Name</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    public const int Distance = 42;
+    public List<dynamic> SpeedData { get; set; } = new List<dynamic>();
+    public List<dynamic> DistanceData { get; set; } = new List<dynamic>();
+
+    public dynamic CurrentElement { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "How long is a marathon");
+        SpeedData = new List<dynamic>
+        {
+            new { Picture = "f1-car.jpg", Name = "F1 Car", Speed = 345d},
+            new { Picture = "slug.jpg", Name = "Slug", Speed = 0.01d},
+            new { Picture = "horse.png", Name = "Horse", Speed = 15d},
+            new { Picture = "sloth.jpg", Name = "Sloth", Speed = 0.12d},
+            new { Picture = "capybara.jpg", Name = "Capybara", Speed = 35d},
+            new { Picture = "jaguar.jpg", Name = "Jaguar", Speed = 80d},
+            new { Picture = "worm.jpg", Name = "Worm", Speed = 0.03d},
+        };
+
+        DistanceData = new List<dynamic>
+        {
+            new { Picture = "bus.jpg", Name = "Bus", Length = 10d},
+            new { Picture = "pair-of-havaianas.jpg", Name = "Pair of Havaianas", Length = 0.245d},
+            new { Picture = "airbus-a380.jpg", Name = "Airbus A380", Length = 73d},
+            new { Picture = "football-field.jpg", Name = "Football Field", Length = 105d},
+            new { Picture = "ronaldinho.jpg", Name = "Ronaldinho", Length = 1.81d},
+        };
+
+        CurrentElement = new {
+            Picture = SpeedData[0].Picture,
+            Name = SpeedData[0].Name,
+            Text = string.Format("The top speed of a {0} is {1}. It would take {2:%h}h {2:%m}m {2:%s}s to complete a 42km marathon.",
+                                    SpeedData[0].Name,
+                                    SpeedData[0].Speed,
+                                    TimeSpan.FromMinutes(42d * 60 / SpeedData[0].Speed))
+        };
+
+    }
+
+    public Task SelectElement(string name)
+    {
+        var findedSpeedEl = SpeedData.SingleOrDefault(x => x.Name == name);
+
+        if (findedSpeedEl != null)
+        {
+            CurrentElement = new
+            {
+                Picture = findedSpeedEl.Picture,
+                Name = findedSpeedEl.Name,
+                Text = string.Format("The top speed of a {0} is {1}. It would take {2:%h}h {2:%m}m {2:%s}s to complete a 42km marathon.",
+                                     findedSpeedEl.Name,
+                                     findedSpeedEl.Speed,
+                                     TimeSpan.FromMinutes(42d * 60 / findedSpeedEl.Speed))
+            };
+        }
+
+        var findedDistanceEl = DistanceData.SingleOrDefault(x => x.Name == name);
+
+        if (findedDistanceEl != null)
+        {
+            CurrentElement = new
+            {
+                Picture = findedDistanceEl.Picture,
+                Name = findedDistanceEl.Name,
+                Text = string.Format("The length of a {0} is {1:0.###}m. It would take {2:0.###} of them to cover the track of a 42km marathon.",
+                                     findedDistanceEl.Name,
+                                     findedDistanceEl.Length,
+                                     42000d / findedDistanceEl.Length)
+            };
+        }
+
+        return Task.FromResult(true);
+    }
+
+}
