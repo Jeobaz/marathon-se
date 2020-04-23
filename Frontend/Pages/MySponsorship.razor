@@ -1,0 +1,120 @@
+﻿@page "/mysponsorship"
+@attribute [Authorize(Roles = "R")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <!-- Buffer column -->
+            <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+            <!-- /Buffer column -->
+            <div class="container col-xl-10 col-md-8 col-lg-12 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-4 mb-3">My sponsorship</h1>
+                <h3 class="text-center font-weight-normal dark-grey mt-3">
+                    This shows all the sponsorship you
+                    have recieved for Marahon Skills 2015.
+                </h3>
+                <div class="row mt-5">
+                    @if (charity != null)
+                    {
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                        <h3 class="text-center font-weight-normal mid-grey">@charity.CharityName</h3>
+                        <div class="row mt-3">
+                            <div class="col-3"></div>
+                            <div class="col-6">
+                                <img class="img-fluid " src="../img/charity/@charity.CharityLogo"
+                                     alt="">
+                            </div>
+                            <div class="col-3"></div>
+                        </div>
+                        <p class="mt-5">
+                            @foreach(var row in charity.CharityDescription.Split('\n'))
+                            {
+                                <p>@row</p>
+                            }
+                        </p>
+
+
+                    </div>
+                    }
+                    else
+                    {
+                        <h3>Loading data...</h3>
+                    }
+
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-5">
+                    <div class="table-responsive">
+
+                        @if (sponsorships != null && sponsorships.Count > 0)
+                        {
+                            <table class="table table-sm table-borderless h2">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="h2 mid-grey">Sponsor</th>
+                                        <th scope="col" class="float-right h2 mid-grey mb-0">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sponsor in sponsorships)
+                                    {
+                                        <tr>
+                                            <th scope="row" class="h3">@sponsor.SponsorName</th>
+                                            <td class="float-right h3">$@sponsor.Amount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else if (sponsorships != null && sponsorships.Count == 0)
+                        {
+                            <h4>Empty sponsorships</h4>
+                        }
+                        else
+                        {
+                            <h4>Loading data...</h4>
+                        }
+                    </div>
+                    @if (sponsorships != null && sponsorships.Count > 0)
+                    {
+                        <hr style="border-top-width: 5px;">
+                        <span class="float-right h3 mid-grey">Total $@sponsorships.Sum(x => x.Amount)</span>
+                    }
+                </div>
+                </div>
+            </div>
+            <!-- Buffer column -->
+            <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+            <!-- /Buffer column -->
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private Runner runner;
+
+    public List<Sponsorship> sponsorships;
+    public Charity charity;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var email = (await authenticationStateTask).User.Identity.Name;
+        await JSRuntime.InvokeVoidAsync("setTitle", "My sponsorships");
+        var runner = await runnerService.GetRunnerByEmail(email);
+        charity = await runnerService.GetCharity(runner);
+        sponsorships = await runnerService.GetSponsorships(runner);
+        this.runner = runner;
+    }
+}

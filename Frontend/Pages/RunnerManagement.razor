@@ -1,0 +1,251 @@
+﻿@page "/runnermanagement"
+
+@attribute [Authorize(Roles = "C")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="coordinatormenu" />
+<!-- Modal -->
+<div class="modal fade top" id="exampleModalPreview" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalPreviewLabel" aria-hidden="true" data-backdrop='false'>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header pb-0">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="exampleFormControlTextarea1" rows="5" readonly @bind="EmailsContent">
+                </textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Modal -->
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Runner managment</h2>
+                <div class="row">
+                    <div class="col-sm-0 col-md-0 col-xl-1"></div>
+                    <div class="col-sm-12 col-md-6 co-lg-4 col-xl-4">
+                        <h5 class="text-center font-weight-normal mid-grey">Sort and filter</h5>
+                        <div class="form-group input-group mx-0 my-0 pb-2 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Status: </span>
+                            </div>
+                            @if (RegistrationStatuses != null)
+                            {
+                                <select class="custom-select my-0" @bind="regStatusId">
+                                    <option value="0">All</option>
+                                    @foreach (var reg in RegistrationStatuses)
+                                    {
+                                        <option value="@reg.RegistrationStatusId">@reg.RegistrationStatus1</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                        <div class="form-group input-group mx-0 my-0 pb-2 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Race event: </span>
+                            </div>
+                            @if (EventTypes != null)
+                            {
+                                <select class="custom-select my-0" @bind="eventTypeId">
+                                    @foreach (var evnt in EventTypes)
+                                    {
+                                        <option value="@evnt.EventTypeId">@evnt.EventTypeName</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                        <div class="form-group input-group mx-0 my-0 pb-2 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Sort by: </span>
+                            </div>
+                            <select class="custom-select my-0" @bind="sortByValue">
+                                @foreach (var field in sortFields)
+                                {
+                                    <option value="@field.Value">@field.Title</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-1 col-lg-2 col-xl-2 d-flex justify-content-center align-items-end">
+                        <button type="button" class="btn btn-sm btn-light mb-2" @onclick="RefreshTable">Refresh</button>
+                    </div>
+                    <div class="col-sm-12 col-md-5 col-lg-4 col-xl-4 mb-2">
+                        <h5 class="text-center font-weight-normal mid-grey">Export</h5>
+                        <button type="button" class="btn btn-block btn-light w-75 mx-auto" @onclick="SaveCSVFile">
+                            Runner details
+                            (CSV)
+                        </button>
+                        <button id="modalActivate" type="button" class="btn btn-block btn-light w-75 mx-auto mt-3"
+                                data-target="#exampleModalPreview" data-toggle="modal">
+                            Email address
+                            lists
+                        </button>
+
+                    </div>
+                </div>
+                @if (tableRunners != null && tableRunners.Runners != null && tableRunners.Runners.Count > 0)
+                {
+                    <span class="text center my-4 h5">
+                        <span class="font-weight-bold">Total runners: </span> <span class="font-weight-normal"> @tableRunners.TotalRunners</span>
+                    </span>
+                    <div class="row">
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+                        <div class="col-sm-12 col-md-12 col-lg-10 col-xl-8 text-center">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="bg-mid-grey black-text">
+                                        <tr>
+                                            <th scope="col">First name</th>
+                                            <th scope="col">Last name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var runner in tableRunners.Runners)
+                                        {
+                                            <tr>
+                                                <td>@runner.Registration.Runner.EmailNavigation.FirstName</td>
+                                                <td>@runner.Registration.Runner.EmailNavigation.LastName</td>
+                                                <td>@runner.Registration.Runner.Email</td>
+                                                <td>@runner.Registration.RegistrationStatus.RegistrationStatus1</td>
+                                                <td><button type="button" class="btn btn-sm btn-light mb-2">Edit</button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+                    </div>
+                }
+                else if (tableRunners != null && tableRunners.Runners != null && tableRunners.Runners.Count == 0)
+                {
+                    <h3>No result</h3>
+                }
+                else
+                {
+                    <h3>Loading data...</h3>
+                }
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+
+    private List<RegistrationStatus> registrationStatuses;
+
+    private List<RegistrationStatus> _regStatuses;
+    public List<RegistrationStatus> RegistrationStatuses
+    {
+        get => _regStatuses;
+        set
+        {
+            _regStatuses = value;
+            if (value.Count > 0)
+                regStatusId = "0";
+        }
+    }
+    private string regStatusId;
+
+    private List<EventType> _eventTypes;
+    public List<EventType> EventTypes
+    {
+        get => _eventTypes;
+        set
+        {
+            _eventTypes = value;
+            if (value.Count > 0)
+                eventTypeId = value.First().EventTypeId;
+        }
+    }
+    private string eventTypeId;
+
+    private List<(string Value, string Title)> sortFields = new List<(string Value, string Title)>
+{
+        (Value: "FirstName", Title: "First name"),
+        (Value: "LastName", Title: "Last name"),
+        (Value: "Email", Title: "Email"),
+        (Value: "RegisterStatus", Title: "Status")
+    };
+    public string sortByValue = "FirstName";
+
+    public RaceResultsViewModel tableRunners { get; set; } = new RaceResultsViewModel();
+
+    private string fileNameCSV = "RunnersDetails.csv";
+
+    private string EmailsContent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Runner management");
+        EventTypes = await Http.GetJsonAsync<List<EventType>>($"{config.Value.Domain}/api/EventTypes/");
+        RegistrationStatuses = await Http.GetJsonAsync<List<RegistrationStatus>>($"{config.Value.Domain}/api/RegistrationStatus/");
+        tableRunners = await Http.GetJsonAsync<RaceResultsViewModel>(
+            $"{config.Value.Domain}/api/Runners/filter?" +
+            $"eventTypeId={eventTypeId}&" +
+            $"registerStatus={regStatusId}&" +
+            $"sortBy={sortByValue}"
+            );
+        var rows = tableRunners.Runners.Select(x =>
+            $"\"{x.Registration.Runner.EmailNavigation.FirstName} {x.Registration.Runner.EmailNavigation.LastName}\" " +
+            $"<{x.Registration.Runner.Email}>");
+        EmailsContent = string.Join($";\n", rows);
+    }
+
+    public async Task RefreshTable()
+    {
+        tableRunners = null;
+        tableRunners = await Http.GetJsonAsync<RaceResultsViewModel>(
+            $"{config.Value.Domain}/api/Runners/filter?" +
+            $"eventTypeId={eventTypeId}&" +
+            $"registerStatus={regStatusId}&" +
+            $"sortBy={sortByValue}"
+            );
+        var rows = tableRunners.Runners.Select(x =>
+            $"\"{x.Registration.Runner.EmailNavigation.FirstName} {x.Registration.Runner.EmailNavigation.LastName}\" " +
+            $"<{x.Registration.Runner.Email}>");
+        EmailsContent = string.Join($";\n", rows);
+    }
+
+    public async Task SaveCSVFile()
+    {
+        var csvContent = "FirstName,LastName,Email,Gender,Country,DateOfBirth,RegistrationStatus,RaceEvents" + Environment.NewLine;
+
+        foreach (var row in tableRunners.Runners)
+        {
+            var tempEvents = await runnerService.GetRaceEvents(row.Registration);
+            csvContent += $"{row.Registration.Runner.EmailNavigation.FirstName}," +
+                          $"{row.Registration.Runner.EmailNavigation.LastName}," +
+                          $"{row.Registration.Runner.Email}," +
+                          $"{row.Registration.Runner.Gender}," +
+                          $"{row.Registration.Runner.DateOfBirth.Value.ToShortDateString()}," +
+                          $"{row.Registration.RegistrationStatus.RegistrationStatus1}," +
+                          $"\"{string.Join(",", tempEvents)}\"" +
+                          Environment.NewLine;
+        }
+
+        await JSRuntime.InvokeVoidAsync("FileSaveAs", fileNameCSV, csvContent);
+    }
+}

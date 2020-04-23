@@ -11,5 +11,8 @@ namespace Frontend.Services
         public Task<Runner> RegisterRunnerAsync(Runner runner);
         public Task EditRunnerAsync(Runner runner);
         public Task<Runner> GetRunnerByEmail(string email);
+        public Task<List<Sponsorship>> GetSponsorships(Runner runner);
+        public Task<Charity> GetCharity(Runner runner);
+        public Task<List<string>> GetRaceEvents(Registration regRunner);
     }
 }

@@ -41,6 +41,38 @@ namespace Backend.Controllers
             return registrationEvent;
         }
 
+        public (int From, int To) GetBorders(string ageCatgory)
+        {
+            if (ageCatgory == "U18")
+                return (0, 18);
+            else if (ageCatgory == "18to29")
+                return (18, 30);
+            else if (ageCatgory == "30to39")
+                return (30, 40);
+            else if (ageCatgory == "40to55")
+                return (40, 56);
+            else if (ageCatgory == "56to70")
+                return (56, 71);
+            else
+                return (71, int.MaxValue);
+        }
+
+        // GET: api/RegistrationEvents/filter
+        [HttpGet("filter")]
+        public async Task<ActionResult<RegistrationEvent>> FilterRegisterEvent(int marathonId, string eventTypeId, string genderId, string ageCategory)
+        {
+            var borders = GetBorders(ageCategory);
+
+            //var registrationEvent = await _context.RegistrationEvent.FindAsync(id);
+
+            //if (registrationEvent == null)
+            //{
+            //    return NotFound();
+            //}
+
+            return null;
+        }
+
         // PUT: api/RegistrationEvents/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
