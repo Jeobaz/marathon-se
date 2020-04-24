@@ -1,0 +1,106 @@
+﻿@page "/sponsorshipoverview"
+@attribute [Authorize(Roles = "C")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="coordinatormenu" />
+
+<!-- Main Container -->
+<main>
+    @if (charityAmounts != null)
+    {
+    <div class="justify-content-center align-items-center bg-white">
+        <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Sponsorship overview</h2>
+        <div class="form-group input-group row justify-content-center">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Sort by: </span>
+            </div>
+            <select class="custom-select my-0" @bind="sortByVal">
+                <option value="Name">Charity name</option>
+                <option value="Amount">Total amount</option>
+            </select>
+            <div class="input-group-append">
+                <button type="button" class="btn btn-light btn-sm" @onclick="SortTable">Sort</button>
+            </div>
+            <div class="row col-12 justify-content-center mt-3">
+                <span class="text-center h3 font-weight-normal">
+                    <span class="mr-4 mid-grey">Charities: @charityAmounts.Count</span><span class="mid-grey">
+                        Total
+                        Sponsorship: $@((int)charityAmounts.Sum(x => x.Amount))
+                    </span>
+                </span>
+            </div>
+
+        </div>
+
+            <div class="container-fluid">
+                <div class="container text-center col-xl-4 col-md-8 col-lg-10 col-xl-10 justify-content-center">
+                    <div class="row">
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                        <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8 text-center">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="bg-mid-grey black-text">
+                                        <tr>
+                                            <th scope="col">Logo</th>
+                                            <th scope="col">Charity Name</th>
+                                            <th scope="col">Total Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var el in charityAmounts)
+                                        {
+                                            <tr>
+                                                <th scope="row"><img src="../img/charity/@el.CharityLogo" class="table-photo" alt=""></th>
+                                                <td>@el.CharityName</td>
+                                                <td>$@el.Amount</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    }
+</main>
+<!-- /Main Container -->
+
+@code {
+
+    private List<CharityAmount> charityAmounts;
+    private string sortByVal = "Name";
+
+    protected override void OnInitialized()
+    {
+        charityAmounts = new List<CharityAmount>();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Sponsorship overview");
+        charityAmounts = await Http.GetJsonAsync<List<CharityAmount>>($"{config.Value.Domain}/api/Charities/sponsors/");
+    }
+
+    public async Task SortTable()
+    {
+        if (sortByVal == "Name")
+            charityAmounts = charityAmounts.OrderBy(x => x.CharityName).ToList();
+        else if (sortByVal == "Amount")
+            charityAmounts = charityAmounts.OrderBy(x => x.Amount).ToList();
+        StateHasChanged();
+    }   
+}

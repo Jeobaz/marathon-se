@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components;
 
 namespace Frontend.Services
 {
@@ -121,6 +122,22 @@ namespace Frontend.Services
             var returnedRaceEvents = JsonConvert.DeserializeObject<List<string>>(responseBody);
 
             return await Task.FromResult(returnedRaceEvents);
+        }
+
+        public async Task<Runner> GetRunnerById(int id)
+        {
+            return await _httpClient.GetJsonAsync<Runner>($"{_config.Value.Domain}/api/Runners/{id}/");
+        }
+
+        public async Task EditRunnerAsync(Registration registration)
+        {
+            var serializedRunner = JsonConvert.SerializeObject(registration);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"{_config.Value.Domain}/api/Runners/withStatus/{registration.Runner.RunnerId}/");
+            requestMessage.Content = new StringContent(serializedRunner);
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
         }
     }
 }

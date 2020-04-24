@@ -57,22 +57,6 @@ namespace Backend.Controllers
                 return (71, int.MaxValue);
         }
 
-        // GET: api/RegistrationEvents/filter
-        [HttpGet("filter")]
-        public async Task<ActionResult<RegistrationEvent>> FilterRegisterEvent(int marathonId, string eventTypeId, string genderId, string ageCategory)
-        {
-            var borders = GetBorders(ageCategory);
-
-            //var registrationEvent = await _context.RegistrationEvent.FindAsync(id);
-
-            //if (registrationEvent == null)
-            //{
-            //    return NotFound();
-            //}
-
-            return null;
-        }
-
         // PUT: api/RegistrationEvents/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.

@@ -56,10 +56,15 @@ namespace Backend.Controllers
                                                     .ThenInclude(reg => reg.RegistrationEvent)
                                                         .ThenInclude(regEvent => regEvent.Event)
                                                             .ThenInclude(evnt => evnt.Marathon)
+                                                                .ThenInclude(mar => mar.CountryCodeNavigation)
                                               .Include(x => x.Registration)
                                                     .ThenInclude(reg => reg.RegistrationEvent)
                                                         .ThenInclude(regEvent => regEvent.Event)
                                                             .ThenInclude(evnt => evnt.EventType)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.Charity)
+                                              .Include(x => x.EmailNavigation)
+                                              .AsNoTracking()
                                               .SingleOrDefaultAsync(x => x.RunnerId == runnerId);
 
             if (runner == null)
@@ -121,6 +126,15 @@ namespace Backend.Controllers
         public async Task<ActionResult<Runner>> GetRunner(int id)
         {
             var runner = await _context.Runner.Include(x => x.EmailNavigation)
+                                              .Include(x => x.CountryCodeNavigation)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.Charity)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.RaceKitOption)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.RegistrationEvent)
+                                                          .ThenInclude(x => x.Event)
+                                                                .ThenInclude(x => x.EventType)
                                               .SingleOrDefaultAsync(x => x.RunnerId == id);
 
             if (runner == null)
@@ -229,11 +243,13 @@ namespace Backend.Controllers
 
             _context.Attach(runner);
             _context.Entry(runner).Reference(x => x.EmailNavigation).IsModified = true;
+            _context.Entry(runner).Reference(x => x.CountryCodeNavigation).IsModified = true;
             _context.Entry(runner).State = EntityState.Modified;
 
             try
             {
                 _context.User.Update(runner.EmailNavigation);
+                _context.Country.Update(runner.CountryCodeNavigation);
                 _context.Runner.Update(runner);
                 await _context.SaveChangesAsync();
             }
@@ -248,6 +264,42 @@ namespace Backend.Controllers
                     throw;
                 }
             }
+
+            return NoContent();
+        }
+
+        [HttpPut("withStatus/{id}")]
+        public async Task<IActionResult> PutRunner(int id, [FromBody] Registration registration)
+        {
+            if (id != registration.Runner.RunnerId)
+            {
+                return BadRequest();
+            }
+
+            var regCurrent = await _context.Registration.Include(x => x.Runner)
+                                                        .Include(x => x.RegistrationStatus)
+                                                        .AsNoTracking()
+                                                        .SingleOrDefaultAsync(x => x.RegistrationId == registration.RegistrationId);
+            regCurrent.Runner = registration.Runner;
+            regCurrent.RegistrationStatus = registration.RegistrationStatus;
+
+            try
+            {
+                _context.Registration.Update(regCurrent);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!RunnerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            
 
             return NoContent();
         }

@@ -1,24 +1,25 @@
-﻿@inject HttpClient Http
-@using Microsoft.Extensions.Options;
-@using Frontend.Data;
-@using Frontend.ViewModels;
-@using Frontend.Services;
-@inject IOptions<BackendDomain> config
+﻿@page "/runnereditproifle/{RunnerId:int}"
+@attribute [Authorize(Roles = "C")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
 @inject IRunnerService runnerService
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
 
-<Header UrlBack="runnermenu"/>
+<Header UrlBack=@($"managerunner/{RunnerId}") />
 
 <!-- Main Container -->
 <main>
     <div class="justify-content-center align-items-center bg-white">
         <div class="container-fluid">
             <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
-                <h1 class="text-center font-weight-normal dark-grey mt-3">Edit your profile</h1>
+                <h3 class="text-center font-weight-normal dark-grey mt-3">Edit runner profile</h3>
             </div>
-            <div class="row mt-4">
+            <div class="row">
                 <!-- Buffer column -->
                 <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
                 <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8">
@@ -33,7 +34,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Email: </span>
                                     </div>
-                                    <input type="text" class="form-control" readonly value="@State.User.Identity.Name" />
+                                    <input type="text" class="form-control" readonly value="@runner.Email" />
                                 </div>
 
                                 <!-- First Name -->
@@ -53,7 +54,7 @@
                                 <!-- Gender -->
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text">Gender: </span>
+                                        <span class="input-group-text md-addon">Gender: </span>
                                     </div>
                                     <select class="custom-select form-control"
                                             @bind="runnerView.GenderId">
@@ -70,15 +71,16 @@
                                         }
                                     </select>
                                 </div>
-                                <!-- Date of Brth -->
+                                <!-- Date of Birth -->
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text md-addon">Date of birth: </span>
+                                        <span class="input-group-text">Date of birth: </span>
                                     </div>
                                     <input placeholder="Selected date" type="date" @bind="runnerView.DateBirth" class="form-control">
                                 </div>
+
                                 <!-- Country -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Country: </span>
                                     </div>
@@ -100,29 +102,47 @@
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 text-center">
-                                <p class="h3 dark-grey text-center ">Change password</p>
-                                <p class="dark-grey text-center ">
-                                    Leave these fields blank, if you don't want to
-                                    change the password.
-                                </p>
+                                <span class="h4 font-weight-normal dark-grey col-12">Change password</span>
+                                <h5 class="h5 font-weight-normal mid-grey mt-4 font-italic">
+                                    Leave these fields blank if you do
+                                    not
+                                    want to change the password
+                                </h5>
                                 <!-- Password -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Password: </span>
                                     </div>
                                     <input type="password" class="form-control" @bind-value="runnerView.Password" placeholder="Password">
                                 </div>
                                 <!-- Password Again -->
-                                <div class="md-form input-group">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">Password Again: </span>
                                     </div>
                                     <input type="password" class="form-control" @bind-value="runnerView.ConfirmPassword" placeholder="Re-enter password">
                                 </div>
+                                <span class="h4 font-weight-normal dark-grey mt-4">Registration status</span>
+                                <div class="form-group">
+                                    @if (Statuses != null)
+                                    {
+                                    <select class="custom-select md-form w-50 mx-auto my-0"
+                                            searchable="Search here.." @bind="runnerView.RegStatus">
+                                        @foreach (var stat in Statuses)
+                                        {
+                                            <option value="@stat.RegistrationStatusId">@stat.RegistrationStatus1</option>
+                                        }
+                                    </select>
+                                    }
+                                    else
+                                    {
+                                        <h3>Loading data...</h3>
+                                    }
+                                </div>
+
                             </div>
                         </div>
-
-                        <div class="row justify-content-center mb-4">
+                        <div class="row justify-content-center">
                             <!-- Buttons field -->
                             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
                                 <button class="btn btn-light btn-block text-dark my-1"
@@ -130,7 +150,7 @@
                             </div>
                             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
                                 <a class="btn btn-light btn-block text-dark my-1"
-                                   href="runnermenu">Cancel</a>
+                                   href="23ManageRunner.html">Cancel</a>
                             </div>
                             <!-- /Buttons field -->
                         </div>
@@ -143,14 +163,16 @@
     </div>
 </main>
 <!-- /Main Container -->
+
 @code {
     [Parameter]
-    public AuthenticationState State { get; set; }
-    private EditRunnerView runnerView;
+    public int RunnerId { get; set; }
+    private EditRunnerCoordView runnerView;
+    private Runner runner;
+    private List<RegistrationStatus> _statuses;
     private List<Gender> _genders;
     private List<Country> _countries;
     public string messageInfo;
-    public Runner runner;
 
     public List<Gender> Genders
     {
@@ -180,35 +202,51 @@
         }
     }
 
+    public List<RegistrationStatus> Statuses
+    {
+        get => _statuses;
+        set
+        {
+            _statuses = value;
+            if (value.Count > 0)
+            {
+                runnerView.RegStatus = value.First().RegistrationStatusId.ToString();
+                StateHasChanged();
+            }
+        }
+    }
+
     protected override void OnInitialized()
     {
-        runnerView = new EditRunnerView();
+        runnerView = new EditRunnerCoordView();
         Genders = new List<Gender>();
         Countries = new List<Country>();
         runner = new Runner();
+        Statuses = new List<RegistrationStatus>();
         base.OnInitialized();
     }
 
     protected override async Task OnInitializedAsync()
     {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Edit runner profile");
+        runner = await runnerService.GetRunnerById(RunnerId);
+        Statuses = await Http.GetJsonAsync<List<RegistrationStatus>>($"{config.Value.Domain}/api/RegistrationStatus/");
         Genders = await Http.GetJsonAsync<List<Gender>>($"{config.Value.Domain}/api/Genders/");
         Countries = await Http.GetJsonAsync<List<Country>>($"{config.Value.Domain}/api/Countries/");
-        runner = await Http.PostJsonAsync<Runner>($"{config.Value.Domain}/api/Runners/email/", State.User.Identity.Name);
-        runnerView = new EditRunnerView
+        runnerView = new EditRunnerCoordView
         {
             FirstName = runner.EmailNavigation.FirstName,
             LastName = runner.EmailNavigation.LastName,
             GenderId = runner.Gender,
             DateBirth = runner.DateOfBirth.Value,
-            CountryId = runner.CountryCode
-            
+            CountryId = runner.CountryCode,
+            RegStatus = runner.Registration.First().RegistrationStatusId.ToString()
         };
     }
 
-
     private async Task<bool> ValidEdit()
     {
-        var email = State.User.Identity.Name;
+        var email = runner.Email;
         var editedRunner = new Runner
         {
             RunnerId = runner.RunnerId,
@@ -223,20 +261,26 @@
             },
             DateOfBirth = runnerView.DateBirth,
             Gender = runnerView.GenderId,
-            CountryCode = runnerView.CountryId,
+            CountryCode = runnerView.CountryId
+        };
+
+        var register = new Registration
+        {
+            RegistrationId = runner.Registration.First().RegistrationId,
+            Runner = editedRunner,
+            RegistrationStatus = Statuses.Single(x => x.RegistrationStatusId == byte.Parse(runnerView.RegStatus))
         };
 
         if (runnerView.Password == runner.EmailNavigation.Password || string.IsNullOrEmpty(runnerView.Password))
         {
 
-            await runnerService.EditRunnerAsync(editedRunner);
+            await runnerService.EditRunnerAsync(register);
 
-            NavigationManager.NavigateTo("/runnermenu");
+            NavigationManager.NavigateTo($"/managerunner/{runner.RunnerId}");
         }
         else
             messageInfo = "Invalid password";
 
         return await Task.FromResult(true);
     }
-
 }
