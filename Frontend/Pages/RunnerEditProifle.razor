@@ -271,15 +271,10 @@
             RegistrationStatus = Statuses.Single(x => x.RegistrationStatusId == byte.Parse(runnerView.RegStatus))
         };
 
-        if (runnerView.Password == runner.EmailNavigation.Password || string.IsNullOrEmpty(runnerView.Password))
-        {
+        await runnerService.EditRunnerAsync(register);
 
-            await runnerService.EditRunnerAsync(register);
+        NavigationManager.NavigateTo($"/managerunner/{runner.RunnerId}");
 
-            NavigationManager.NavigateTo($"/managerunner/{runner.RunnerId}");
-        }
-        else
-            messageInfo = "Invalid password";
 
         return await Task.FromResult(true);
     }

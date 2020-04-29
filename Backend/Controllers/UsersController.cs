@@ -142,6 +142,50 @@ namespace Backend.Controllers
             return null;
         }
 
+        // GET: api/Users/filter?sortBy=LastName&role=R&search=john
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<User>>> UsersFilter(
+            string sortBy,
+            string role,
+            string search)
+        {
+
+            var query = _context.User.Include(x => x.Role).AsQueryable();
+
+            if (!string.IsNullOrEmpty(role) && role != "All")
+                query = query.Where(x => x.RoleId == role);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var searchStrLower = search.ToLower();
+
+                query = query.Where(x => x.Email.ToLower().Contains(searchStrLower) ||
+                                         x.FirstName.ToLower().Contains(searchStrLower) ||
+                                         x.LastName.ToLower().Contains(searchStrLower));
+            }
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "FirstName":
+                        query = query.OrderBy(x => x.FirstName);
+                        break;
+                    case "LastName":
+                        query = query.OrderBy(x => x.LastName);
+                        break;
+                    case "Email":
+                        query = query.OrderBy(x => x.Email);
+                        break;
+                    case "Role":
+                        query = query.OrderBy(x => x.Role.RoleName);
+                        break;
+                }
+            }
+
+            return await query.AsNoTracking().ToListAsync();
+        }
+
         private async Task<User> GetUserByToken(string token)
         {
             try
@@ -202,62 +246,61 @@ namespace Backend.Controllers
             return tokenHandler.WriteToken(token);
         }
 
-        // PUT: api/Users/5
+        // PUT: api/Users/test@mail.ru
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutUser(string id, User user)
-        //{
-        //    if (id != user.Email)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser(string id, User user)
+        {
+            if (id != user.Email)
+            {
+                return BadRequest();
+            }
 
-        //    _context.Entry(user).State = EntityState.Modified;
+            _context.Entry(user).State = EntityState.Modified;
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!UserExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
         // POST: api/Users
-        //TODO: REGISTER
-        //[HttpPost]
-        //public async Task<ActionResult<User>> PostUser(User user)
-        //{
-        //    _context.User.Add(user);
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (UserExists(user.Email))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+        [HttpPost]
+        public ActionResult<User> PostUser(User user)
+        {
+            _context.User.Add(user);
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                if (UserExists(user.Email))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-        //    return CreatedAtAction("GetUser", new { id = user.Email }, user);
-        //}
+            return CreatedAtAction("GetUser", new { id = user.Email }, user);
+        }
 
         // DELETE: api/Users/5
         //[HttpDelete("{id}")]

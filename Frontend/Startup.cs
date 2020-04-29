@@ -13,6 +13,7 @@ using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Frontend.Services;
 using Blazored.Modal;
+using Blazor.FileReader;
 
 //using Microsoft.AspNetCore.Blazor.HttpClient;
 namespace Frontend
@@ -39,7 +40,9 @@ namespace Frontend
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IRunnerService, RunnerService>();
+            services.AddSingleton<ICharityService, CharityService>();
             services.AddBlazoredModal();
+            services.AddFileReaderService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

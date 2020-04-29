@@ -1,0 +1,158 @@
+﻿@page "/addcharity"
+@page "/editcharity/{CharityId:int}"
+@*@attribute [Authorize(Roles = "A")]*@
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@inject ICharityService charityService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+@inject IFileReaderService fileReaderService
+
+<Header UrlBack="managecharities" />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <EditForm Model="currentCharity" OnValidSubmit="SaveData">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="container col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                    <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Add/edit charity</h2>
+                    <div class="row">
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                        <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10 row">
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-5">
+                                <div class="form-group col-7">
+                                    <label for="name">Name:</label>
+                                    <input class="form-control" type="text" placeholder="Charity Name" @bind-value="currentCharity.CharityName">
+                                </div>
+                                <div class="form-group col-10">
+                                    <label for="desc">Description:</label>
+                                    <textarea class="form-control" id="desc" rows="5"
+                                              placeholder="Description of the charity" @bind="currentCharity.CharityDescription" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-5">
+                                <p class="font-italic mid-grey col-sm-12 col-md-10 col-lg-10 col-xl-10 text-center mx-auto">
+                                    Leave the "logo file" field blank if you do not want
+                                    to change the logo
+                                </p>
+                                <div class="form-group">
+                                    <label for="customFile">Logo file:</label>
+                                    <div class="custom-file">
+                                        @*<input type="file" @ref="inputTypeFileElement" id="customFile">*@
+                                        <InputFile OnChange="HandleFileSelected" id="customFile" class="custom-file-input"/>
+                                        @*<InputFile OnChange="HandleFileSelected" />*@
+                                        <label class="custom-file-label" for="customFile">@(string.IsNullOrEmpty(currentCharity.CharityLogo) ? "Choose file" : currentCharity.CharityLogo)</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customFile">Current logo:</label>
+                                    @if (!string.IsNullOrEmpty(PathImage))
+                                    {
+                                        <img src="@PathImage" width="300" height="300" class="img-fluid" alt="">
+                                    }
+                                    else
+                                    {
+                                        <div>Not loaded picture</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                    </div>
+                    <div class="row justify-content-center mt-5">
+                        <!-- Buttons field -->
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                            <button type="submit" class="btn btn-light btn-block text-dark my-1">Save</button>
+                        </div>
+                        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                            <a class="btn btn-light btn-block text-dark my-1"
+                               href="managecharities">Cancel</a>
+                        </div>
+                        <!-- /Buttons field -->
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    [Parameter]
+    public int? CharityId { get; set; }
+    public Charity currentCharity { get; set; } = new Charity();
+
+    ElementReference inputTypeFileElement;
+
+    public string SourceBS64;
+    public string PathImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Add/edit charity");
+        if (CharityId.HasValue)
+        {
+            currentCharity = await Http.GetJsonAsync<Charity>($"{config.Value.Domain}/api/Charities/{CharityId.Value}/");
+            PathImage = $"../img/charity/{currentCharity.CharityLogo}";
+        }
+        else
+        {
+            currentCharity = new Charity();
+        }
+    }
+
+    public async Task HandleFileSelected(IFileListEntry[] files)
+    {
+        var firstFile = files.FirstOrDefault();
+        using var memory = await firstFile.ReadAllAsync();
+
+        byte[] imageBytes = memory.ToArray();
+        PathImage = $"data:image/jpeg;base64,{Convert.ToBase64String(imageBytes)}";
+        SourceBS64 = Convert.ToBase64String(imageBytes);
+        currentCharity.CharityLogo = firstFile.Name;
+    }
+
+
+    public async Task SaveData()
+    {
+        if (PathImage.Contains("data:image/jpeg;base64"))
+        {
+            SaveImage();
+        }
+
+        if (CharityId.HasValue)
+        {
+            var charity = await charityService.EditCharity(currentCharity);
+        }
+        else
+        {
+            var charity = await charityService.AddCharity(currentCharity);
+        }
+
+        NavigationManager.NavigateTo("/managecharities");
+    }
+
+    public Image SaveImage()
+    {
+        //data:image/gif;base64,
+        //this image is a single pixel (black)
+        byte[] bytes = Convert.FromBase64String(SourceBS64);
+        using var ms = new MemoryStream(bytes);
+
+
+        var image = Image.Load(bytes);
+        image.Save($"wwwroot/img/charity/{currentCharity.CharityLogo}");
+
+
+        return image;
+    }
+}

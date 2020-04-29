@@ -1,0 +1,88 @@
+﻿@page "/managecharities"
+@*@attribute [Authorize(Roles = "A")]*@
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IUserService userService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="adminmenu" />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Manage charities</h2>
+                <div class="container col-12 row">
+                    <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                    <p class="col-sm-12 col-md-12 col-lg-10 col-xl-10 text-left">
+                        <a href="addcharity" class="btn btn-light mx-auto">+ Add a new charity</a>
+                    </p>
+                    <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                </div>
+                @if (Charities != null)
+                {
+                <div class="row">
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                    <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10 text-center">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="bg-mid-grey black-text">
+                                    <tr>
+                                        <th scope="col">Logo</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var charity in Charities)
+                                    {
+                                        <tr>
+                                            <th scope="row">
+                                                <img src="../img/charity/@charity.CharityLogo"
+                                                     class="table-photo" alt="">
+                                            </th>
+                                            <td>@charity.CharityName</td>
+                                            <td>
+                                                @foreach(var p in charity.CharityDescription.Split('\n'))
+                                                {
+                                                    <p>@p</p>
+                                                }
+                                            </td>
+                                            <td class="p-0">
+                                                <a href="editcharity/@charity.CharityId" class="btn btn-sm btn-light mx-auto">Edit</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    private List<Charity> Charities;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Manage charities");
+        Charities = await Http.GetJsonAsync<List<Charity>>($"{config.Value.Domain}/api/Charities/");
+    }
+
+}

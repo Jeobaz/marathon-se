@@ -226,7 +226,7 @@
             CountryCode = runnerView.CountryId,
         };
 
-        if (runnerView.Password == runner.EmailNavigation.Password || string.IsNullOrEmpty(runnerView.Password))
+        if (string.IsNullOrEmpty(runnerView.Password))
         {
 
             await runnerService.EditRunnerAsync(editedRunner);

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="../img/favicon.png" sizes="64x64" type="image/png">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Sponsorship overview</title>
+    <title>Manage charities</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
     <!-- Bootstrap core CSS -->
@@ -19,11 +19,6 @@
 
 <body>
 
-    <style>
-        .table-photo{
-            height: 45px;
-        }
-    </style>
     <div class="container-fluid px-0">
 
         <!-- Header -->
@@ -48,76 +43,95 @@
             </div>
         </nav>
         <!-- /Header -->
-
+        <style>
+            .table-photo {
+                height: 45px;
+            }
+        </style>
         <!-- Main Container -->
         <main>
             <div class="justify-content-center align-items-center bg-white">
-                <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Sponsorship overview</h2>
-                <div class="md-form input-group row justify-content-center">
-                    <div class="input-group-prepend mr-3">
-                        <span class="input-group-text md-addon">Sort by: </span>
-                    </div>
-                    <select class="mdb-select md-form my-0">
-                        <option value="1">Payment confirmed</option>
-                        <option value="2">18-29</option>
-                        <option value="3">30-39</option>
-                    </select>
-
-                    <button type="button" class="btn btn-light btn-sm ml-5">Sort</button>
-                    <div class="row col-12 justify-content-center mt-3">
-                        <span class="text-center h3 font-weight-normal"><span class="mr-4 mid-grey">Charities: 10</span><span class="mid-grey">Total
-                                Sponsorship: $94,450</span></span>
-                    </div>
-
-                </div>
-
                 <div class="container-fluid">
-                    <div class="container text-center col-xl-4 col-md-8 col-lg-10 col-xl-10 justify-content-center">
+                    <div class="container text-center col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                        <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Manage charities</h2>
+                        <div class="container col-12 row">
+                            <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                            <p class="col-sm-12 col-md-12 col-lg-10 col-xl-10 text-left">
+                                <button type="button" class="btn btn-light mx-auto">+ Add a new charity</button>
+                            </p>
+                            <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                        </div>
                         <div class="row">
                             <!-- Buffer column -->
-                            <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
-                            <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8 text-center">
+                            <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                            <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10 text-center">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="bg-mid-grey black-text">
                                             <tr>
                                                 <th scope="col">Logo</th>
-                                                <th scope="col">Charity Name</th>
-                                                <th scope="col">Total Amount</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col">Edit</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <th scope="row"><img src="../img/charity/arise-logo.png" class="table-photo" alt=""></th>
+                                                <th scope="row"><img src="../img/charity/arise-logo.png"
+                                                        class="table-photo" alt=""></th>
                                                 <td>Charity Name 1</td>
-                                                <td>$21,080</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
                                             </tr>
                                             <tr>
-                                                <th scope="row"><img src="../img/charity/aves-do-brazil-logo.png" class="table-photo" alt=""></th>
+                                                <th scope="row"><img src="../img/charity/arise-logo.png"
+                                                        class="table-photo" alt=""></th>
                                                 <td>Charity Name 2</td>
-                                                <td>$21,080</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
                                             </tr>
                                             <tr>
-                                                <th scope="row"><img src="../img/charity/clara-santos-oliveira-institute-logo.png" class="table-photo" alt=""></th>
+                                                <th scope="row"><img
+                                                        src="../img/charity/clara-santos-oliveira-institute-logo.png"
+                                                        class="table-photo" alt=""></th>
                                                 <td>Charity Name 3</td>
-                                                <td>$21,080</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
                                             </tr>
                                             <tr>
-                                                <th scope="row"><img src="../img/charity/conquer-cancer-brazil.png" class="table-photo" alt=""></th>
+                                                <th scope="row"><img src="../img/charity/conquer-cancer-brazil.png"
+                                                        class="table-photo" alt=""></th>
                                                 <td>Charity Name 4</td>
-                                                <td>$21,080</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
                                             </tr>
                                             <tr>
-                                                <th scope="row"><img src="../img/charity/diabetes-brazil-logo.png" class="table-photo" alt=""></th>
+                                                <th scope="row"><img src="../img/charity/diabetes-brazil-logo.png"
+                                                        class="table-photo" alt=""></th>
                                                 <td>Charity Name 5</td>
-                                                <td>$21,080</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"><img
+                                                        src="../img/charity/heart-health-sao-paulo-logo.png"
+                                                        class="table-photo" alt=""></th>
+                                                <td>Charity Name 6</td>
+                                                <td>Summary of the descrtiption of the charity shown there.</td>
+                                                <td class="p-0"><button type="button"
+                                                        class="btn btn-sm btn-light mx-auto">Edit</button></td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                             <!-- Buffer column -->
-                            <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                            <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
                         </div>
                     </div>
         </main>

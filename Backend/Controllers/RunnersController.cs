@@ -143,7 +143,8 @@ namespace Backend.Controllers
             return runner;
         }
 
-        // GET: api/Runners/filter?marathonId=2&eventTypeId=FR&genderId=Male&ageCategory=18to29&registerStatus=1&sortBy=LastName
+        // GET: api/Runners/filter?marathonId=2&eventTypeId=FR&genderId=Male&ageCategory=18to29&registerStatus=1&sortBy=LastName&role=R
+        // TODO: разделить метод на несколько отдельных методов
         [HttpGet("filter")]
         public async Task<ActionResult<dynamic>> FilterRunner(
             int? marathonId,
@@ -214,6 +215,7 @@ namespace Backend.Controllers
                 Runners = runnersResult
             };
         }
+
 
         // POST: api/Runners/email/
         [HttpPost("email")]

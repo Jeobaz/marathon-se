@@ -102,5 +102,41 @@ namespace Frontend.Services
 
             return await Task.FromResult(returnedToken);
         }
+
+        public async Task EditUserAsync(User user)
+        {
+            var serializedUser = JsonConvert.SerializeObject(user);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"{_config.Value.Domain}/api/Users/{user.Email}/");
+            requestMessage.Content = new StringContent(serializedUser);
+
+            requestMessage.Content.Headers.ContentType
+                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<User> AddUserAsync(User user)
+        {
+            var serializedUser = JsonConvert.SerializeObject(user);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Users/");
+            requestMessage.Content = new StringContent(serializedUser);
+
+            requestMessage.Content.Headers.ContentType
+                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
+
+            return await Task.FromResult(returnedUser);
+        }
     }
 }

@@ -1,0 +1,162 @@
+﻿@page "/adduser"
+@attribute [Authorize(Roles = "A")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IUserService userService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="usermanagment" />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-3">Add a new user</h1>
+            </div>
+            <EditForm Model="UserModel" OnValidSubmit="ValidEdit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <h3 class="danger-color">@ErrorMessage</h3>
+                <div class="row mt-4">
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-1 col-lg-1 col-xl-3"></div>
+                    <div class="col-sm-12 col-md-10 col-lg-10 col-xl-6">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
+                                <!-- Email -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Email: </span>
+                                    </div>
+                                    <input type="text" class="form-control" @bind-value="@UserModel.Email">
+                                </div>
+
+                                <!-- First Name -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">First Name: </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="First Name" @bind-value="UserModel.FirstName">
+                                </div>
+                                <!-- Last Name -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Last Name: </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Last Name" @bind-value="UserModel.LastName">
+                                </div>
+                                <!-- Role -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Role: </span>
+                                    </div>
+                                    @if (Roles != null)
+                                    {
+                                        <select class="custom-select md-form col-md-6 col-lg-9 col-xl-10 my-0" @bind="UserModel.RoleId">
+                                            @foreach (var rol in Roles)
+                                            {
+                                                <option value="@rol.RoleId">@rol.RoleName</option>
+                                            }
+                                        </select>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+                            <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
+                                <p class="h3 dark-grey text-center ">New password</p>
+                                <!-- Password -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Password: </span>
+                                    </div>
+                                    <input type="password" class="form-control" placeholder="Password" @bind-value="UserModel.Password">
+                                </div>
+                                <!-- Password Again -->
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text md-addon">Password Again: </span>
+                                    </div>
+                                    <input type="password" class="form-control" placeholder="Re-enter password" @bind-value="UserModel.ConfirmPassword">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-4">
+                            <!-- Buttons field -->
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                                <button type="submit" class="btn btn-light btn-block text-dark my-1">Save</button>
+                            </div>
+                            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-2">
+                                <a class="btn btn-light btn-block text-dark my-1"
+                                   href="usermanagment">Cancel</a>
+                            </div>
+                            <!-- /Buttons field -->
+                        </div>
+                    </div>
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-1 col-lg-1 col-xl-3"></div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+
+    public UserViewModelPasswords UserModel = new UserViewModelPasswords();
+    public List<Role> _roles;
+    public List<Role> Roles
+    {
+        get => _roles;
+        set
+        {
+            _roles = value;
+            if (value.Count > 0)
+            {
+                UserModel.RoleId = value.First().RoleId;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private string ErrorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Add a new user");
+        Roles = await Http.GetJsonAsync<List<Role>>($"{config.Value.Domain}/api/Roles/");
+    }
+
+    private async Task<bool> ValidEdit()
+    {
+        var editedUser = new User
+        {
+            Email = UserModel.Email,
+            FirstName = UserModel.FirstName,
+            LastName = UserModel.LastName,
+            Password = UserModel.Password,
+            RoleId = UserModel.RoleId
+        };
+
+
+        var user = await userService.AddUserAsync(editedUser);
+        if (user.Email != null)
+        {
+            NavigationManager.NavigateTo("/usermanagment");
+            ErrorMessage = "";
+        }
+        else
+        {
+            ErrorMessage = "Error in add user";
+        }
+
+
+        return await Task.FromResult(true);
+    }
+}

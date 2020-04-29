@@ -1,0 +1,166 @@
+﻿@page "/usermanagment"
+@attribute [Authorize(Roles = "A")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="adminmenu" />
+
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">User Management</h2>
+                <div class="row">
+                    <div class="col-sm-0 col-md-0 col-xl-1"></div>
+                    <div class="col-sm-12 col-md-6 co-lg-4 col-xl-4">
+                        <a href="adduser" class="btn btn-block btn-light w-75 mx-auto">
+                            + Add a new user
+                        </a>
+                    </div>
+
+                    <div class="col-sm-12 col-md-5 col-lg-4 col-xl-4 mb-2">
+                        <div class="form-group input-group mx-0 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Filter by role: </span>
+                            </div>
+                            @if (Roles != null)
+                            {
+                            <select class="custom-select md-form my-0" @bind="roleId">
+                                <option value="All">All roles</option>
+                                @foreach (var r in Roles)
+                                {
+                                    <option value="@r.RoleId">@r.RoleName</option>
+                                }
+                            </select>
+                            }
+                        </div>
+                        <div class="form-group input-group mx-0 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Sort by: </span>
+                            </div>
+                            <select class="custom-select my-0" @bind="sortByValue">
+                                @foreach (var field in sortFields)
+                                {
+                                    <option value="@field.Value">@field.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group input-group mx-0 justify-content-center">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Search: </span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Search for..." @bind-value="searchField" />
+                        </div>
+                        <div class="md-form input-group mx-0 my-0 justify-content-center">
+                            <div class="input-group-prepend mr-3">
+                                <button type="button" class="btn btn-sm btn-light mb-2" @onclick="RefreshTable">Refresh</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                @if (users != null && users.Count > 0)
+                {
+                    <span class="text center my-4 h5">
+                        <span class="font-weight-bold">Total users: </span> <span class="font-weight-normal"> @users.Count</span>
+                    </span>
+                    <div class="row">
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+                        <div class="col-sm-12 col-md-12 col-lg-10 col-xl-8 text-center">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="bg-mid-grey black-text">
+                                        <tr>
+                                            <th scope="col">First Name</th>
+                                            <th scope="col">Last Name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Role</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in users)
+                                        {
+                                            <tr>
+                                                <td>@row.FirstName</td>
+                                                <td>@row.LastName</td>
+                                                <td>@row.Email</td>
+                                                <td>@row.Role.RoleName</td>
+                                                <td>
+                                                    <a href="edituser/@row.Email" class="btn btn-block btn-light">Edit</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Buffer column -->
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+                    </div>
+                }
+                else if (users != null && users.Count == 0)
+                {
+                    <h3>No result</h3>
+                }
+                else
+                {
+                    <h3>Loading data...</h3>
+                }
+            </div>
+        </div>
+    </div>
+</main>
+
+@code {
+
+    public List<Role> Roles { get; set; }
+    private string roleId = "All";
+
+    public List<User> users { get; set; }
+
+    private List<(string Value, string Title)> sortFields = new List<(string Value, string Title)>
+    {
+        (Value: "FirstName", Title: "First name"),
+        (Value: "LastName", Title: "Last name"),
+        (Value: "Email", Title: "Email"),
+        (Value: "Role", Title: "Role")
+    };
+    public string sortByValue = "FirstName";
+
+    public string searchField = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "User management");
+        Roles = await Http.GetJsonAsync<List<Role>>($"{config.Value.Domain}/api/Roles/");
+        users = await Http.GetJsonAsync<List<User>>(
+            $"{config.Value.Domain}/api/Users/filter?" +
+            $"role={roleId}&" +
+            $"search={searchField}&" +
+            $"sortBy={sortByValue}"
+            );
+        StateHasChanged();
+    }
+
+    public async Task RefreshTable()
+    {
+        users = null;
+        users = await Http.GetJsonAsync<List<User>>(
+            $"{config.Value.Domain}/api/Users/filter?" +
+            $"role={roleId}&" +
+            $"search={searchField}&" +
+            $"sortBy={sortByValue}"
+            );
+        StateHasChanged();
+    }
+
+}

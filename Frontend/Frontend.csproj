@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Blazored.Modal" Version="4.0.0" />
     <PackageReference Include="Blazored.SessionStorage" Version="1.0.11" />
+    <PackageReference Include="BlazorInputFile" Version="0.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.2.0-preview3.20168.3" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
@@ -19,6 +20,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
+    <PackageReference Include="Tewr.Blazor.FileReader" Version="1.5.0.20109" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,5 +15,9 @@ namespace Frontend.Services
         public Task<User> GetUserByToken(string token);
 
         public Task<string> GetTokenByUser(User user);
+
+        public Task EditUserAsync(User user);
+
+        public Task<User> AddUserAsync(User user);
     }
 }
