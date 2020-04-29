@@ -27,6 +27,42 @@ namespace Backend.Controllers
             return await _context.Charity.ToListAsync();
         }
 
+        // GET: api/Charities/sponsors?sortBy=Name
+        [HttpGet("sponsors")]
+        public async Task<ActionResult<IEnumerable<Charity>>> GetCharityWithSponsors(string sortBy)
+        {
+            var result = await _context.RegistrationEvent.Include(x => x.Event)
+                                                        .ThenInclude(x => x.Marathon)
+                                                .Include(x => x.Registration)
+                                                        .ThenInclude(x => x.Charity)
+                                                .Where(x => x.Event.Marathon.YearHeld == 2015)
+                                                .ToListAsync();
+
+            var groupedRes = result.GroupBy(x => x.Registration.Charity)
+                                    .Select(x => new CharityAmount
+                                    {
+                                        CharityId = x.Key.CharityId,
+                                        CharityDescription = x.Key.CharityDescription,
+                                        CharityLogo = x.Key.CharityLogo,
+                                        CharityName = x.Key.CharityName,
+                                        Amount = (int)x.Sum(y => y.Registration.SponsorshipTarget)
+                                    })
+                                    .OrderBy(x => x.CharityName)
+                                    .ToList();
+
+            //switch (sortBy)
+            //{
+            //    case "Name":
+            //        groupedRes = groupedRes.OrderBy(x => x.CharityName).ToList();
+            //        break;
+            //    case "Amount":
+            //        groupedRes = groupedRes.OrderBy(x => x.Amount).ToList();
+            //        break;
+            //}
+            
+            return groupedRes;
+        }
+
         // GET: api/Charities/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Charity>> GetCharity(int id)

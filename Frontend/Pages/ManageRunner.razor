@@ -1,0 +1,129 @@
+﻿@page "/managerunner/{RunnerId:int}"
+@attribute [Authorize(Roles = "C")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="runnermanagement" />
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Manage a runner</h2>
+        <div class="container-fluid">
+            <div class="container text-center col-sm-12 col-md-12 col-lg-12 col-xl-10 justify-content-center">
+                <div class="row">
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1"></div>
+                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 text-center row px-0">
+                        @if (runner != null)
+                        {
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 row">
+                                <div class="col-6 text-right pl-0 pr-1">
+                                    <br />
+                                    <span class="h5 font-weight-normal dark-grey">
+                                        Email:
+                                    </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">First Name: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Last Name: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Gender: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Date of Birth: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Country: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Charity: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Targer to Raise: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Race Kit Option: </span> <br />
+                                    <span class="h5 font-weight-normal dark-grey">Race event: </span> <br />
+                                </div>
+                                <div class="col-6 text-left px-0">
+                                    <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.Email</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.EmailNavigation.FirstName</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.EmailNavigation.LastName</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.Gender</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.DateOfBirth.Value.ToShortDateString()</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.CountryCodeNavigation.CountryName</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.Registration.First().Charity.CharityName</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">$@((int)runner.Registration.First().SponsorshipTarget)</span> <br />
+                                    <span class="h5 font-weight-normal mid-grey">@runner.Registration.First().RaceKitOption.RaceKitOption1</span> <br />
+                                    @foreach (var evnt in runner.Registration.First().RegistrationEvent.Select(x => x.Event.EventType.EventTypeName))
+                                    {
+                                        <span class="h5 font-weight-normal mid-grey">@evnt</span> <br />
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                <span class="h3 font-weight-normal dark-grey">Registration status</span>
+                                @if (statuses != null)
+                                {
+                                    foreach (var stat in statuses)
+                                    {
+                                        <div class="row mt-2">
+                                            <div class="col-9 d-flex align-items-center justify-content-end">
+                                                <span class="h4 font-weight-normal text-right">@stat.RegistrationStatus1</span>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="fa-stack fa-2x">
+                                                    @if (runner.Registration.First().RegistrationStatusId >= stat.RegistrationStatusId)
+                                                    {
+                                                        <i class="fas fa-circle fa-stack-2x text-success"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                                    }
+                                                    <i class="fas fa-check fa-stack-1x fa-inverse"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <a href="certificatepreview/@RunnerId"
+                                               class="btn btn-sm btn-block btn-light">Preview certificate</a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="runnereditproifle/@RunnerId"
+                                               class="btn btn-sm btn-block btn-light">Edit profile</a>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <h3>Loading data...</h3>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <h3>Loading data...</h3>
+                        }
+                    </div>
+                    <!-- Buffer column -->
+                    <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+@code {
+    [Parameter]
+    public int RunnerId { get; set; }
+
+    private Runner runner;
+    private List<RegistrationStatus> statuses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Manage runner");
+        runner = await runnerService.GetRunnerById(RunnerId);
+        statuses = await Http.GetJsonAsync<List<RegistrationStatus>>($"{config.Value.Domain}/api/RegistrationStatus/");
+    }
+}

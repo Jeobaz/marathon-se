@@ -56,10 +56,15 @@ namespace Backend.Controllers
                                                     .ThenInclude(reg => reg.RegistrationEvent)
                                                         .ThenInclude(regEvent => regEvent.Event)
                                                             .ThenInclude(evnt => evnt.Marathon)
+                                                                .ThenInclude(mar => mar.CountryCodeNavigation)
                                               .Include(x => x.Registration)
                                                     .ThenInclude(reg => reg.RegistrationEvent)
                                                         .ThenInclude(regEvent => regEvent.Event)
                                                             .ThenInclude(evnt => evnt.EventType)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.Charity)
+                                              .Include(x => x.EmailNavigation)
+                                              .AsNoTracking()
                                               .SingleOrDefaultAsync(x => x.RunnerId == runnerId);
 
             if (runner == null)
@@ -100,12 +105,36 @@ namespace Backend.Controllers
 
 
         }
+        public (int From, int To) GetBorders(string ageCatgory)
+        {
+            if (ageCatgory == "U18")
+                return (0, 18);
+            else if (ageCatgory == "18to29")
+                return (18, 30);
+            else if (ageCatgory == "30to39")
+                return (30, 40);
+            else if (ageCatgory == "40to55")
+                return (40, 56);
+            else if (ageCatgory == "56to70")
+                return (56, 71);
+            else
+                return (71, int.MaxValue);
+        }
 
         // GET: api/Runners/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Runner>> GetRunner(int id)
         {
             var runner = await _context.Runner.Include(x => x.EmailNavigation)
+                                              .Include(x => x.CountryCodeNavigation)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.Charity)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.RaceKitOption)
+                                              .Include(x => x.Registration)
+                                                    .ThenInclude(x => x.RegistrationEvent)
+                                                          .ThenInclude(x => x.Event)
+                                                                .ThenInclude(x => x.EventType)
                                               .SingleOrDefaultAsync(x => x.RunnerId == id);
 
             if (runner == null)
@@ -114,9 +143,81 @@ namespace Backend.Controllers
             return runner;
         }
 
+        // GET: api/Runners/filter?marathonId=2&eventTypeId=FR&genderId=Male&ageCategory=18to29&registerStatus=1&sortBy=LastName
+        [HttpGet("filter")]
+        public async Task<ActionResult<dynamic>> FilterRunner(
+            int? marathonId,
+            string eventTypeId,
+            string genderId,
+            string ageCategory,
+            int? registerStatus,
+            string sortBy)
+        {
+            var borders = GetBorders(ageCategory);
+            var query = _context.RegistrationEvent.Include(x => x.Registration)
+                                                        .ThenInclude(x => x.Runner)
+                                                            .ThenInclude(x => x.EmailNavigation)
+                                                  .Include(x => x.Registration)
+                                                        .ThenInclude(x => x.RegistrationStatus)
+                                                  .Include(x => x.Registration)
+                                                        .ThenInclude(x => x.Runner)
+                                                            .ThenInclude(x => x.CountryCodeNavigation)
+                                                  .AsQueryable();
+            if (marathonId.HasValue)
+                query = query.Where(x => x.Event.MarathonId == marathonId.Value);
+
+            if (!string.IsNullOrEmpty(eventTypeId))
+                query = query.Where(x => x.Event.EventTypeId == eventTypeId);
+
+            if (!string.IsNullOrEmpty(genderId) && genderId != "Any")
+                query = query.Where(x => x.Registration.Runner.Gender == genderId);
+
+            if (registerStatus.HasValue && registerStatus != 0)
+                query = query.Where(x => x.Registration.RegistrationStatusId == registerStatus.Value);
+
+            var now = DateTime.Now;
+            if (!string.IsNullOrEmpty(genderId))
+                query = query.Where(x => (now.Year - x.Registration.Runner.DateOfBirth.Value.Year) >= borders.From &&
+                                         (now.Year - x.Registration.Runner.DateOfBirth.Value.Year) < borders.To);
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch(sortBy)
+                {
+                    case "FirstName":
+                        query = query.OrderBy(x => x.Registration.Runner.EmailNavigation.FirstName);
+                        break;
+                    case "LastName":
+                        query = query.OrderBy(x => x.Registration.Runner.EmailNavigation.LastName);
+                        break;
+                    case "Email":
+                        query = query.OrderBy(x => x.Registration.Runner.Email);
+                        break;
+                    case "RaceTime":
+                        query = query.OrderBy(x => x.RaceTime).Where(x => x.RaceTime.HasValue && x.RaceTime > 0);
+                        break;
+                    case "RegisterStatus":
+                        query = query.OrderBy(x => x.Registration.RegistrationStatus.RegistrationStatus1);
+                        break;
+                }
+            }
+
+            var runnersResult = await query.AsNoTracking()
+                                           .ToListAsync();
+
+            return new
+            {
+                TotalRunners = runnersResult.Count,
+                TotalRunnersFinished = runnersResult.Count(x => x.RaceTime.HasValue),
+                AvgRaceTime = runnersResult.Where(x => x.RaceTime.HasValue)
+                                           .Average(x => x.RaceTime) ?? 0,
+                Runners = runnersResult
+            };
+        }
+
         // POST: api/Runners/email/
         [HttpPost("email")]
-        public async Task<ActionResult<Runner>> GetRunnerIdFromEmail([FromBody] string email)
+        public async Task<ActionResult<Runner>> GetRunnerFromEmail([FromBody] string email)
         {
             var runner = await _context.Runner.Include(x => x.EmailNavigation)
                                               .Include(x => x.Registration)
@@ -139,19 +240,16 @@ namespace Backend.Controllers
             {
                 return BadRequest();
             }
-            //ru
+
             _context.Attach(runner);
             _context.Entry(runner).Reference(x => x.EmailNavigation).IsModified = true;
+            _context.Entry(runner).Reference(x => x.CountryCodeNavigation).IsModified = true;
             _context.Entry(runner).State = EntityState.Modified;
-            //var runnerToUpdate = await _context.Runner.SingleAsync(x => x.RunnerId == runner.RunnerId);
+
             try
             {
-                //runnerToUpdate.EmailNavigation.FirstName = runner.EmailNavigation.FirstName;
-                //runnerToUpdate.EmailNavigation.LastName = runner.EmailNavigation.LastName;
-                //runnerToUpdate.CountryCode = runner.CountryCode;
-                //runnerToUpdate.Gender = runner.Gender;
-                //runnerToUpdate.DateOfBirth = runner.DateOfBirth;
                 _context.User.Update(runner.EmailNavigation);
+                _context.Country.Update(runner.CountryCodeNavigation);
                 _context.Runner.Update(runner);
                 await _context.SaveChangesAsync();
             }
@@ -166,6 +264,42 @@ namespace Backend.Controllers
                     throw;
                 }
             }
+
+            return NoContent();
+        }
+
+        [HttpPut("withStatus/{id}")]
+        public async Task<IActionResult> PutRunner(int id, [FromBody] Registration registration)
+        {
+            if (id != registration.Runner.RunnerId)
+            {
+                return BadRequest();
+            }
+
+            var regCurrent = await _context.Registration.Include(x => x.Runner)
+                                                        .Include(x => x.RegistrationStatus)
+                                                        .AsNoTracking()
+                                                        .SingleOrDefaultAsync(x => x.RegistrationId == registration.RegistrationId);
+            regCurrent.Runner = registration.Runner;
+            regCurrent.RegistrationStatus = registration.RegistrationStatus;
+
+            try
+            {
+                _context.Registration.Update(regCurrent);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!RunnerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            
 
             return NoContent();
         }
@@ -189,6 +323,44 @@ namespace Backend.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRunner", new { id = runner.RunnerId }, runner);
+        }
+
+        // POST: api/Runners/charity
+        [HttpPost("charity")]
+        public async Task<ActionResult<Charity>> GetCharityByRunner([FromBody]Runner runner)
+        {
+            var charity = await _context.Charity.SingleOrDefaultAsync(x => x.CharityId == runner.Registration.First().CharityId);
+            
+            if (charity == null)
+                return NotFound();
+
+            return charity;
+        }
+
+        // POST: api/Runners/sponsorships
+        [HttpPost("sponsorships")]
+        public async Task<ActionResult<List<Sponsorship>>> GetSponsorshipsByRunner([FromBody]Runner runner)
+        {
+            var sponsorships = await _context.Sponsorship.Where(x => x.RegistrationId == runner.Registration.First().RegistrationId)
+                                                         .ToListAsync();
+
+            if (sponsorships == null)
+                return NotFound();
+
+            return sponsorships;
+        }
+
+        // POST: api/Runners/raceevents
+        [HttpPost("raceevents")]
+        public async Task<ActionResult<List<string>>> GetRaceEventsByRunner([FromBody]Registration regRunner)
+        {
+            var raceEvents = await _context.RegistrationEvent.Include(x => x.Event)
+                                                                .ThenInclude(x => x.EventType)
+                                                             .Where(x => x.RegistrationId == regRunner.RegistrationId)
+                                                             .Select(x => x.Event.EventType.EventTypeName)
+                                                             .ToListAsync();
+
+            return raceEvents;
         }
 
         // DELETE: api/Runners/5

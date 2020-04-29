@@ -1,0 +1,128 @@
+﻿@page "/certificatepreview/{RunnerId:int}"
+@attribute [Authorize(Roles = "C")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack=@($"managerunner/{RunnerId}") />
+
+@if (regEvents.Count > 0)
+{
+    <div class="justify-content-center bg-mid-grey text-dark py-3">
+        <div class="container col-sm-12 col-md-5 col-lg-5 col-xl-3">
+            <div class="form-group row text-center">
+                <p class="col-sm-3 col-form-label">Race event:</p>
+                <div class="col-sm-8">
+                    <select name="race" class="custom-select form-control" @bind="eventTypeId">
+                        @foreach (var evnt in eventTypes)
+                        {
+                            <option value="@evnt.EventTypeId">@evnt.EventTypeName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    @if (currentRegEvntInfo != null)
+    {
+        <div class="form-inline  justify-content-center p-4 text-center">
+            <img src="../img/charity/@currentRegEvntInfo.Registration.Charity.CharityLogo" alt="center" style="width: 450px;">
+        </div>
+        <div class="class=container  text-center">
+            <h2 class="text-center font-weight-normal dark-grey my-5">
+                Congratulations @currentRegEvntInfo.Registration.Runner.EmailNavigation.FirstName
+                @currentRegEvntInfo.Registration.Runner.EmailNavigation.LastName for running in
+                the @currentRegEvntInfo.Event.EventType.EventTypeName.
+                <br> You ran a time of @(TimeSpan.FromSeconds(currentRegEvntInfo.RaceTime.Value).ToString()) and got a rank of @currentRegEvntInfo.GeneralRank @*<sup><small>rd</small></sup>*@
+            </h2>
+
+            <div class="col-12">
+                <p>
+                    <h1 class="display-4 font-weight-normal dark-grey">Certificate of Participation</h1>
+                    <h2 class="display-5 font-weight-normal dark-grey">in</h2>
+                </p>
+            </div>
+            <div class="row">
+                <div class="col-sm-0 col-md-2 col-lg-3 col-xl-3"></div>
+                <div class="col-sm-12 col-md-7 col-lg-6 col-xl-6">
+                    <h1 class="display-4 font-weight-normal dark-grey">@currentRegEvntInfo.Event.Marathon.MarathonName<br> </h1>
+                    <h2 class="display-5 font-weight-normal dark-grey">@currentRegEvntInfo.Event.Marathon.CityName, @currentRegEvntInfo.Event.Marathon.CountryCodeNavigation.CountryName</h2>
+
+                    <h2 class="text-center font-weight-normal dark-grey my-5">
+                        You also rised $@((int)currentRegEvntInfo.Registration.SponsorshipTarget) for @currentRegEvntInfo.Registration.Charity.CharityName!
+                    </h2>
+                </div>
+                <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 ml-0 pl-0 text-xl-left"><img src="../img/ok.png" alt=""></div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h3>Not found events.</h3>
+}
+@code {
+    [Parameter]
+    public int RunnerId { get; set; }
+    private Runner runner;
+    private List<RegEventWithRanks> regEvents;
+    private short LastYear;
+    private List<EventType> _eventTypes;
+    private List<EventType> eventTypes
+    {
+        get => _eventTypes;
+        set
+        {
+            _eventTypes = value;
+            if (value.Count > 0)
+                eventTypeId = value.First().EventTypeId;
+        }
+    }
+
+    private RegEventWithRanks currentRegEvntInfo;
+
+    private string _evntTypeId;
+    private string eventTypeId
+    {
+        get => _evntTypeId;
+        set
+        {
+            _evntTypeId = value;
+            if (!string.IsNullOrEmpty(value))
+            {
+                currentRegEvntInfo = regEvents.Single(x => x.Event.EventTypeId == value);
+                var temp = currentRegEvntInfo.Event.Marathon;
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        runner = new Runner();
+        regEvents = new List<RegEventWithRanks>();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Cerificate preview");
+        runner = await runnerService.GetRunnerById(RunnerId);
+        regEvents = await Http.PostJsonAsync<List<RegEventWithRanks>>($"{config.Value.Domain}/api/Runners/ranks", runner.RunnerId);
+        if (regEvents.Count > 0)
+        {
+            LastYear = regEvents.Select(x => x.Event.Marathon.YearHeld.Value)
+                              .Where(x => x != 2015)
+                              .OrderByDescending(x => x)
+                              .First();
+            regEvents = regEvents.Where(x => x.Event.Marathon.YearHeld == LastYear).ToList();
+            eventTypes = regEvents.Select(x => x.Event.EventType).ToList();
+        }
+    }
+}

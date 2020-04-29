@@ -1,0 +1,268 @@
+﻿@page "/previousraceresults"
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@using Frontend.ViewModels
+@inject IRunnerService runnerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+
+<Header UrlBack="findoutmore" />
+
+<!-- Main Container -->
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid">
+            <div class="container text-center col-sm-10 col-md-10 col-lg-10 col-xl-8">
+                <h1 class="text-center font-weight-normal dark-grey mt-4 mb-3">Previous race results</h1>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-xl-5 px-0">
+                        <div class="md-form input-group mx-0">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text md-addon">Marathon: </span>
+                            </div>
+                            <select class="custom-select md-form my-0 w-50" @bind="marathonId">
+                                @foreach (var mar in Marathons)
+                                {
+                                    <option value="@mar.MarathonId">@mar.YearHeld - @mar.CityName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-5 px-0">
+                        <div class="form-group input-group mx-0">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text md-addon">Gender: </span>
+                            </div>
+                            <select class="custom-select my-0 w-50" @bind="selectedGender">
+                                <option value="" selected>Any</option>
+                                @foreach (var gender in Genders)
+                                {
+                                    <option value="@gender.Gender1">@gender.Gender1</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5 px-0">
+                        <div class="form-group input-group mx-0">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text md-addon">Race event: </span>
+                            </div>
+                            <select class="custom-select my-0" @bind="eventTypeId">
+                                @foreach (var evnt in EventTypes)
+                                {
+                                    <option value="@evnt.EventTypeId">@evnt.EventTypeName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 px-0">
+                        <div class="form-group input-group mx-0">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text md-addon">Age Category: </span>
+                            </div>
+                            <select class="custom-select my-0 w-50" @bind="ageCategoryId">
+                                <option value="U18">Under 18</option>
+                                <option value="18to29">18-29</option>
+                                <option value="30to39">30-39</option>
+                                <option value="40to55">40-55</option>
+                                <option value="56to70">56-70</option>
+                                <option value="O70">Over 70</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-2">
+                        <button class="text-center btn btn-lg btn-light waves-effect waves-light text-dark py-2 mt-3"
+                                @onclick="Filtering">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                @if (raceResults == null || raceResults.Runners == null)
+                {
+                    <h5>Loading data...</h5>
+                }
+                else if(raceResults.TotalRunners > 0)
+                {
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <span class="h4">Total runners:</span>
+                            <span class="h5">@raceResults.TotalRunners</span>
+                        </li>
+                        <li class="list-inline-item">
+                            <span class="h4">Total runners finished: </span>
+                            <span class="h5">@raceResults.TotalRunnersFinished</span>
+                        </li>
+                        <li class="list-inline-item">
+                            <span class="h4">Average race time: </span>
+                            <span class="h5">@(string.Format("{0:%h}h {0:%m}m {0:%s}s", TimeSpan.FromSeconds(raceResults.AvgRaceTime)))</span>
+                        </li>
+                    </ul>
+                }
+            </div>
+
+            <div class="row">
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8 text-center">
+                    <div class="table-responsive">
+                        @if(raceResults == null || raceResults.Runners == null)
+                        {
+                            <h3>Loading data...</h3>
+                        }
+                        else if (raceResults.Runners.Count > 0)
+                        {
+                            <table class="table table-bordered table-striped">
+                                <thead class="bg-mid-grey black-text">
+                                    <tr>
+                                        <th scope="col">Rank</th>
+                                        <th scope="col">Race time</th>
+                                        <th scope="col">Runner name</th>
+                                        <th scope="col">Country</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(var i = 0; i < raceResults.Runners.Count; i++)
+                                    {
+                                        <tr>
+                                            <th scope="row">@iterations[i]</th>
+                                            <td>
+                                                @(string.Format("{0:%h}h {0:%m}m {0:%s}s", TimeSpan.FromSeconds(raceResults.Runners[i].RaceTime.Value)))
+                                            </td>
+                                            <td>@raceResults.Runners[i].Registration.Runner.EmailNavigation.FirstName 
+                                                @raceResults.Runners[i].Registration.Runner.EmailNavigation.LastName
+                                            </td>
+                                            <td>@raceResults.Runners[i].Registration.Runner.CountryCode</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <h3>Empty results =-(</h3>
+                        }
+                    </div>
+                </div>
+                <!-- Buffer column -->
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- /Main Container -->
+
+@code {
+    private List<int> iterations = new List<int>();
+    private List<Gender> _genders;
+    public List<Gender> Genders
+    {
+        get => _genders;
+        set
+        {
+            _genders = value;
+            if (value.Count > 0)
+                selectedGender = value.First().Gender1;
+        }
+    }
+    private string selectedGender;
+
+    private List<Marathon> _marathons;
+    public List<Marathon> Marathons
+    {
+        get => _marathons;
+        set
+        {
+            _marathons = value;
+            if (value.Count > 0)
+                marathonId = value.Last().MarathonId.ToString();
+        }
+    }
+    private string marathonId;
+
+    private List<EventType> _eventTypes;
+    public List<EventType> EventTypes
+    {
+        get => _eventTypes;
+        set
+        {
+            _eventTypes = value;
+            if (value.Count > 0)
+                eventTypeId = value.First().EventTypeId;
+        }
+    }
+    private string eventTypeId;
+
+    private string ageCategoryId = "U18";
+
+    private RaceResultsViewModel _raceResultsView = new RaceResultsViewModel();
+    public RaceResultsViewModel raceResults
+    {
+        get => _raceResultsView;
+        set
+        {
+            _raceResultsView = value;
+            if (value != null)
+            {
+                iterations = new List<int>();
+                var it = 1;
+                for (var i = 0; i < value.Runners.Count - 1; i++)
+                {
+                    if (value.Runners[i].RaceTime.Value != value.Runners[i + 1].RaceTime.Value)
+                        iterations.Add(it++);
+                    else
+                        iterations.Add(it);
+                    if(i + 1 == value.Runners.Count - 1)
+                    {
+                        if (value.Runners[i].RaceTime.Value != value.Runners[i + 1].RaceTime.Value)
+                            iterations.Add(it++);
+                        else
+                            iterations.Add(it);
+                    }
+                }
+                StateHasChanged();
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Previous race results");
+
+        Genders = await Http.GetJsonAsync<List<Gender>>($"{config.Value.Domain}/api/Genders/");
+        Marathons = await Http.GetJsonAsync<List<Marathon>>($"{config.Value.Domain}/api/Marathons/");
+        Marathons.Reverse();
+        EventTypes = await Http.GetJsonAsync<List<EventType>>($"{config.Value.Domain}/api/EventTypes/");
+
+        raceResults = await Http.GetJsonAsync<RaceResultsViewModel>(
+            $"{config.Value.Domain}/api/Runners/filter?marathonId={marathonId}&" +
+            $"eventTypeId={eventTypeId}&" +
+            $"genderId={selectedGender}&" +
+            $"ageCategory={ageCategoryId}&" +
+            "sortBy=RaceTime"
+            );
+    }
+
+    protected override void OnInitialized()
+    {
+        Genders = new List<Gender>();
+        Marathons = new List<Marathon>();
+        EventTypes = new List<EventType>();
+        base.OnInitialized();
+    }
+
+    public async Task Filtering()
+    {
+        raceResults = null;
+        raceResults = await Http.GetJsonAsync<RaceResultsViewModel>(
+            $"{config.Value.Domain}/api/Runners/filter?marathonId={marathonId}&" +
+            $"eventTypeId={eventTypeId}&" +
+            $"genderId={selectedGender}&" +
+            $"ageCategory={ageCategoryId}"
+            );
+    }
+}

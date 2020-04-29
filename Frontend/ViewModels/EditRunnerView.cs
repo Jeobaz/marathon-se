@@ -9,12 +9,10 @@ namespace Frontend.ViewModels
     public class EditRunnerView
     {
 
-        [Required]
         [RegularExpression(@"((?=.*\d)(?=[a-z]{0,})(?=.*[A-Z])(?=.*[!@#$%^]).{6,})",
                            ErrorMessage = "Password must contain: 1 digit, 1 uppercase and special symbols: !@#$%^")]
         public string Password { get; set; }
 
-        [Required]
         [Compare("Password", ErrorMessage = "Password and Confirmation Password must match.")]
         public string ConfirmPassword { get; set; }
 

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components;
 
 namespace Frontend.Services
 {
@@ -67,6 +68,76 @@ namespace Frontend.Services
             var returnedRunner = JsonConvert.DeserializeObject<Runner>(responseBody);
 
             return await Task.FromResult(returnedRunner);
+        }
+
+        public async Task<List<Sponsorship>> GetSponsorships(Runner runner)
+        {
+            var serializedRunner = JsonConvert.SerializeObject(runner);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Runners/sponsorships/");
+            requestMessage.Content = new StringContent(serializedRunner);
+
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedSponsorships = JsonConvert.DeserializeObject<List<Sponsorship>>(responseBody);
+
+            return await Task.FromResult(returnedSponsorships);
+        }
+
+        public async Task<Charity> GetCharity(Runner runner)
+        {
+            var serializedRunner = JsonConvert.SerializeObject(runner);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Runners/charity/");
+            requestMessage.Content = new StringContent(serializedRunner);
+
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedCharity = JsonConvert.DeserializeObject<Charity>(responseBody);
+
+            return await Task.FromResult(returnedCharity);
+        }
+
+        public async Task<List<string>> GetRaceEvents(Registration regRunner)
+        {
+            var serializedRunner = JsonConvert.SerializeObject(regRunner);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_config.Value.Domain}/api/Runners/raceevents/");
+            requestMessage.Content = new StringContent(serializedRunner);
+
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var returnedRaceEvents = JsonConvert.DeserializeObject<List<string>>(responseBody);
+
+            return await Task.FromResult(returnedRaceEvents);
+        }
+
+        public async Task<Runner> GetRunnerById(int id)
+        {
+            return await _httpClient.GetJsonAsync<Runner>($"{_config.Value.Domain}/api/Runners/{id}/");
+        }
+
+        public async Task EditRunnerAsync(Registration registration)
+        {
+            var serializedRunner = JsonConvert.SerializeObject(registration);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"{_config.Value.Domain}/api/Runners/withStatus/{registration.Runner.RunnerId}/");
+            requestMessage.Content = new StringContent(serializedRunner);
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(requestMessage);
         }
     }
 }

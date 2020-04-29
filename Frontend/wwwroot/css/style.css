@@ -71,3 +71,7 @@ footer {
     /* Set the fixed height of the footer here */
     line-height: 60px;
 }
+
+.table-photo {
+    height: 45px;
+}
