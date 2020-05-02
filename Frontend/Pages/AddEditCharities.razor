@@ -1,6 +1,7 @@
 ﻿@page "/addcharity"
 @page "/editcharity/{CharityId:int}"
-@*@attribute [Authorize(Roles = "A")]*@
+
+@attribute [Authorize(Roles = "A")]
 @using Microsoft.Extensions.Options
 @using Frontend.Data
 @using Frontend.Services
@@ -46,9 +47,7 @@
                                 <div class="form-group">
                                     <label for="customFile">Logo file:</label>
                                     <div class="custom-file">
-                                        @*<input type="file" @ref="inputTypeFileElement" id="customFile">*@
                                         <InputFile OnChange="HandleFileSelected" id="customFile" class="custom-file-input"/>
-                                        @*<InputFile OnChange="HandleFileSelected" />*@
                                         <label class="custom-file-label" for="customFile">@(string.IsNullOrEmpty(currentCharity.CharityLogo) ? "Choose file" : currentCharity.CharityLogo)</label>
                                     </div>
                                 </div>

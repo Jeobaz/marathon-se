@@ -1,0 +1,178 @@
+﻿@page "/bmicalculator"
+@inject IJSRuntime JSRuntime
+@using Frontend.ViewModels
+
+<Header UrlBack="findoutmore" />
+
+<main>
+    <div class="justify-content-center align-items-center bg-white">
+        <div class="container-fluid px-0">
+            <div class="container text-center col-xl-10 col-md-12 col-lg-12 col-xl-10">
+                <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">BMI Calculator</h2>
+                <EditForm Model="BMIData" OnValidSubmit="Calculate">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-sm-0 col-md-0 col-lg-1 col-xl-1"></div>
+                        <div class="col-sm-12 col-md-6 col-lg-5 col-xl-4 px-4">
+                            <h4 class="mt-4">Information about what BMI is and how the calculator goes here</h4>
+                            <div class="row genders mt-3">
+                                <div class="d-flex align-items-center justify-content-center bg-mid-grey mr-auto gender"
+                                     style="@MaleValue.Style"
+                                     @onclick="SelectMale">
+                                    <div class="block">
+                                        <i class="fas fa-6x fa-male @MaleValue.Color pt-3 px-5 mx-5"></i>
+                                        <span class="h5 @MaleValue.Color">Male</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center bg-mid-grey ml-auto gender"
+                                     style="@FemaleValue.Style"
+                                     @onclick="SelectFemale">
+                                    <div class="block">
+                                        <i class="fas fa-6x fa-female @FemaleValue.Color pt-3 px-5 mx-5"></i>
+                                        <span class="h5 @FemaleValue.Color">Female</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8 mx-auto">
+                                    <div class="form-group row form-horizontal">
+                                        <label for="height" class="col-sm-2 col-form-label mr-3">Height:</label>
+                                        <div class="col-sm-6">
+                                            <InputNumber @bind-Value="BMIData.Height" class="form-control" id="height" placeholder="180" />
+                                        </div>
+                                        <label for="height" class="col-sm-2 pl-0 col-form-label">cm</label>
+                                        <ValidationMessage For="(() => BMIData.Height)" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8 mx-auto">
+                                    <div class="form-group row form-horizontal">
+                                        <label for="weight" class="col-sm-2 col-form-label mr-3">Weight:</label>
+                                        <div class="col-sm-6">
+                                            <InputNumber @bind-Value="BMIData.Weight" class="form-control" id="weight" placeholder="70" />
+                                        </div>
+                                        <label for="weight" class="col-sm-2 pl-0 col-form-label">kg</label>
+                                        <ValidationMessage For="(() => BMIData.Weight)" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <button type="submit" class="btn btn-light btn-block text-dark my-1"
+                                            style="border: 1px solid rgb(80, 80, 80);">Calculate</button>
+                                </div>
+                                <div class="col-6">
+                                    <a href="findoutmore" class="btn btn-light btn-block text-dark my-1">Cancel</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12 col-md-6 col-lg-5 col-xl-6 mb-2 px-4">
+                            @if (BMIValue.HasValue)
+                            {
+                                <div class="d-flex align-items-center justify-content-center bg-mid-grey ml-auto gender p-4 mt-5">
+                                    <div class="block">
+                                        <img src="../img/bmi/bmi-@Status.ToLower()-icon.png" style="width: 50% !important"
+                                             class="col-12 mx-5" alt="">
+                                        <div class="h4 dark-grey text-center col-12">@Status</div>
+                                    </div>
+                                </div>
+                                <div class="row mt-4 tags">
+                                    <span class="h2 col-12 mx-auto" >@Math.Round(BMIValue.Value, 2)</span>
+                                    <br>
+                                    <div style="position: relative;left: calc(@ScrollValue% - 20px);">
+                                        <i class="fas fa-4x fa-caret-down" style="height: 30px;"></i>
+                                    </div>
+                                </div>
+
+
+                                <div class="row index mb-4">
+                                    @foreach (var bord in Borders)
+                                    {
+                                        <div style="height: 20px; width: @((int)((bord.Right - bord.Left) * 100m / Borders.Last().Right))% !important; background-color: @bord.Color;">
+
+                                        </div>
+                                    }
+                                </div>
+                                <div class="row index">
+                                    @foreach (var bord in Borders)
+                                    {
+                                        <div style="width: @((int)((bord.Right - bord.Left) * 100m / Borders.Last().Right))% !important;">
+                                            @bord.Status
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <h3>Enter data</h3>
+                            }
+                        </div>
+                    </div>
+                </EditForm>
+                <div class="col-sm-0 col-md-0 col-lg-1 col-xl-2"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@code {
+    private (string Style, string Color) Selected = ("border: 4px solid rgb(80, 80, 80);", "text-dark");
+    private (string Style, string Color) NotSelected = ("border: 2px solid rgb(128, 128, 128);", "text-secondary");
+
+    public (string Style, string Color) MaleValue;
+    public (string Style, string Color) FemaleValue;
+
+    public List<(decimal Left, decimal Right, string Color, string Status)> Borders = new List<(decimal Left, decimal Right, string Color, string Status)>
+    {
+        (0m, 18.5m, "orange", "Underweight"),
+        (18.5m, 25m, "green", "Healthy"),
+        (25m, 30m, "orange", "Overweight"),
+        (30m, 40m, "red", "Obese")
+    };
+
+    public decimal? BMIValue;
+    public string Status { get; set; }
+
+    public int ScrollValue;
+
+    public BMIViewModel BMIData = new BMIViewModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "BMI calculator");
+        MaleValue = Selected;
+        FemaleValue = NotSelected;
+    }
+
+    public async Task SelectMale()
+    {
+        MaleValue = Selected;
+        FemaleValue = NotSelected;
+    }
+
+    public async Task SelectFemale()
+    {
+        MaleValue = NotSelected;
+        FemaleValue = Selected;
+    }
+
+    public async Task Calculate()
+    {
+        var heightM = ((decimal)BMIData.Height) / 100m;
+
+        BMIValue = BMIData.Weight / (heightM * heightM);
+        ScrollValue = (int)(BMIValue.Value * 100) / 40;
+        ScrollValue = ScrollValue > 100 ? 100 : ScrollValue;
+        Status = GetStatus(BMIValue.Value);
+
+    }
+
+    public string GetStatus(decimal bmivalue)
+    {
+        foreach(var bord in Borders)
+        {
+            if (bmivalue >= bord.Left && bmivalue < bord.Right)
+                return bord.Status;
+        }
+
+        return bmivalue > 40 ? Borders.Last().Status : Borders.First().Status;
+    }
+}

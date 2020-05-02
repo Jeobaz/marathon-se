@@ -1,0 +1,198 @@
+﻿@page "/importvolunteers"
+@attribute [Authorize(Roles = "A")]
+@using Microsoft.Extensions.Options
+@using Frontend.Data
+@using Frontend.Services
+@inject IVolunteerService volunteerService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IOptions<BackendDomain> config
+@inject IJSRuntime JSRuntime
+@inject IFileReaderService fileReaderService
+
+<Header UrlBack="volunteermanagement" />
+
+<div class="container text- center justify-content-center">
+    <h2 class="text-center font-weight-normal dark-grey mt-4 mb-3">Import volunteers</h2>
+    <div class="d-flex justify-content-center align-items-center container">
+        <form class="form-inline content-center row">
+            <div class="custom-file">
+                <InputFile OnChange="HandleReadingFile" id="customFile" class="custom-file-input" />
+                <label class="custom-file-label" for="customFile">
+                @if(string.IsNullOrEmpty(fileName))
+                {
+                    <span>Choose file</span>
+                }
+                else
+                {
+                    @fileName
+                }
+                </label>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            @if (importVolunteerData != null)
+            {
+                <button type="button" class="btn btn-sm btn-light mb-2" @onclick="ImportCSV">Import</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-sm btn-light mb-2" disabled>Import</button>
+            }
+            <button type="button" class="btn btn-sm btn-light mb-2">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-dark" role="alert">
+        <strong>Error!</strong> @ErrorMessage
+    </div>
+}
+
+<div class="container mt-5">
+    <p class="text-center">The CSV file should have the following fields:</p>
+    <p class="text-center mt-4">ID: number unique identifier of volunteer</p>
+    <p class="text-center">FirstName: first name volunteer</p>
+    <p class="text-center">LastName: last name volunteer</p>
+    <p class="text-center">CountryCode: country code 3 chars format</p>
+    <p class="text-center">Gender: Male/Female</p>
+</div>
+
+@if (Success)
+{
+<div class="container mt-5">
+    <p class="text-center">Added records: <b>@NewRecords</b></p>
+    <p class="text-center">Edited records: <b>@EditedRecords</b></p>
+    <p class="text-center">Errors records: <b>@ErrorsRecords</b></p>
+    <p class="text-center">Redirect after 3 seconds...</p>
+</div>
+}
+
+@code {
+    private string fileName;
+    private string ErrorMessage;
+
+    private bool Success = false;
+    int NewRecords = 0;
+    int EditedRecords = 0;
+    int ErrorsRecords = 0;
+
+    private List<string> requiredHeaders = new List<string>
+    {
+        "ID",
+        "FirstName",
+        "LastName",
+        "CountryCode",
+        "Gender"
+    };
+
+    private List<Volunteer> importVolunteerData;
+
+    public async Task ImportCSV()
+    {
+        try
+        {
+            foreach(var vol in importVolunteerData)
+            {
+                var existVolunteer = await volunteerService.ExistVolunteerAsync(vol.VolunteerId);
+
+                bool succesAddEdit = false;
+
+                if(existVolunteer)
+                {
+                    var returnedVolunteer = await volunteerService.EditVolunteerAsync(vol);
+                    succesAddEdit |= returnedVolunteer.FirstName != null;
+                    if (succesAddEdit)
+                        EditedRecords++;
+                }
+                else
+                {
+                    vol.VolunteerId = 0;
+                    var returnedVolunteer = await volunteerService.AddVolunteerAsync(vol);
+                    succesAddEdit |= returnedVolunteer.FirstName != null;
+                    if (succesAddEdit)
+                        NewRecords++;
+                }
+
+                if (!succesAddEdit)
+                    ErrorsRecords++;
+
+            }
+            ErrorMessage = null;
+            Success = true;
+
+            StateHasChanged();
+
+            Thread.Sleep(TimeSpan.FromSeconds(3));
+
+            NavigationManager.NavigateTo("/volunteermanagement");
+        }
+        catch
+        {
+            ErrorMessage = "Error with importing file";
+        }
+    }
+
+    public async Task HandleReadingFile(IFileListEntry[] files)
+    {
+        try
+        {
+            var firstFile = files.FirstOrDefault();
+
+            if (firstFile == null)
+                throw new Exception();
+
+            importVolunteerData = new List<Volunteer>();
+            using var memory = await firstFile.ReadAllAsync();
+
+            var contentLines = System.Text.Encoding.UTF8.GetString(memory.ToArray())
+                                                        .Split('\n');
+
+            var headers = contentLines[0].Split(',');
+
+            if (headers.Length != 5)
+                throw new Exception();
+
+            var validHeader = headers.Select((x, iv) => x != requiredHeaders[iv])
+                                     .Any();
+
+            if(!validHeader)
+                throw new Exception();
+
+            foreach(var row in contentLines[1..])
+            {
+                var splitedRow = row.Split(',');
+
+                if (splitedRow.Count() != 5)
+                    throw new Exception();
+
+                var tempVolunteer = new Volunteer
+                {
+                    VolunteerId = int.Parse(splitedRow[0]),
+                    FirstName = splitedRow[1],
+                    LastName = splitedRow[2],
+                    CountryCode = splitedRow[3],
+                    Gender = splitedRow[4].Replace("\r", string.Empty)
+                };
+
+                importVolunteerData.Add(tempVolunteer);
+
+            }
+            fileName = firstFile.Name;
+            ErrorMessage = null;
+        }
+        catch
+        {
+            ErrorMessage = "Invalid file format";
+            importVolunteerData = null;
+        }
+    }
+}

@@ -6,7 +6,8 @@
 @using Frontend.Data;
 @inject IOptions<BackendDomain> config
 @inject IJSRuntime JSRuntime
-<Header />
+
+<Header UrlBack="findoutmore"/>
 
 <!-- Main Container -->
 <main class="bg-white">
@@ -43,12 +44,11 @@
 <!-- /Main Container -->
 
 @code {
-    public List<Charity> Charities { get; set; }
+    public List<Charity> Charities { get; set; } = new List<Charity>();
 
     protected override async Task OnInitializedAsync()
     {
         await JSRuntime.InvokeVoidAsync("setTitle", "List of charities");
-        Charities = new List<Charity>();
         Charities = await Http.GetJsonAsync<List<Charity>>($"{config.Value.Domain}/api/Charities/");
     }
 }

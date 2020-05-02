@@ -12,6 +12,10 @@ body {
     color: rgb(235, 235, 235);
 }
 
+.red {
+    color: #red;
+}
+
 .bg-light-grey {
     background-color: rgb(235, 235, 235);
 }
@@ -75,3 +79,24 @@ footer {
 .table-photo {
     height: 45px;
 }
+
+.genders > .gender {
+    width: 45%;
+    height: 45%;
+}
+
+.line > .tag {
+    position: relative;
+}
+
+.row > .cell {
+    width: 22.5%;
+}
+
+.row > .healthy {
+    width: 32.5% !important;
+}
+
+.tags > .tag {
+    position: relative;
+           
