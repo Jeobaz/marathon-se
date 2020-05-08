@@ -25,7 +25,8 @@ namespace Frontend.ViewModels
         [Required]
         public string NameOnCard { get; set; }
 
-        [Required, CreditCard]
+        [Required]
+        [IntegerValidator(16, ErrorMessage = "Credit card must be 16 digits")]
         public string CreditCard { get; set; }
 
         [Required]
@@ -33,7 +34,7 @@ namespace Frontend.ViewModels
         public ExpiryDate ExpiryDate { get; set; }
 
         [Required]
-        [StringLength(3, MinimumLength = 3, ErrorMessage = "CVC length = 3")]
+        [IntegerValidator(3, ErrorMessage = "CVC digits = 3")]
         public string CVC { get; set; }
         [Required]
         [Range(10, 1000000)]
@@ -58,6 +59,20 @@ namespace Frontend.ViewModels
             }
 
             return false;
+        }
+    }
+
+    public class IntegerValidator : ValidationAttribute
+    {
+        private int digits;
+        public IntegerValidator(int digits)
+        {
+            this.digits = digits;
+        }
+        public override bool IsValid(object value)
+        {
+
+            return value.ToString().All(x => int.TryParse(x.ToString(), out var dummy)) && value.ToString().Length == digits;
         }
     }
 }

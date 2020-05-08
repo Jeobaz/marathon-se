@@ -45,6 +45,8 @@ namespace Backend.Controllers
                                         .Where(x => x.Registration.Count == 1)
                                         .Where(x => x.Registration.First().RegistrationEvent.Count > 0 &&
                                                     x.Registration.First().RegistrationEvent.Any(regEvent => regEvent.EventId.Contains("15")))
+                                        .OrderBy(x => x.EmailNavigation.LastName)
+                                        .ThenBy(x => x.EmailNavigation.FirstName)
                                         .AsNoTracking()
                                         .ToListAsync();
         }
@@ -146,15 +148,16 @@ namespace Backend.Controllers
         // GET: api/Runners/filter?marathonId=2&eventTypeId=FR&genderId=Male&ageCategory=18to29&registerStatus=1&sortBy=LastName&role=R
         // TODO: разделить метод на несколько отдельных методов
         [HttpGet("filter")]
-        public async Task<ActionResult<dynamic>> FilterRunner(
+        public async Task<ActionResult<RaceResults>> FilterRunner(
             int? marathonId,
             string eventTypeId,
             string genderId,
             string ageCategory,
             int? registerStatus,
-            string sortBy)
+            string sortBy,
+            bool onlyRaceTime)
         {
-            var borders = GetBorders(ageCategory);
+            
             var query = _context.RegistrationEvent.Include(x => x.Registration)
                                                         .ThenInclude(x => x.Runner)
                                                             .ThenInclude(x => x.EmailNavigation)
@@ -177,9 +180,12 @@ namespace Backend.Controllers
                 query = query.Where(x => x.Registration.RegistrationStatusId == registerStatus.Value);
 
             var now = DateTime.Now;
-            if (!string.IsNullOrEmpty(genderId))
+            if (!string.IsNullOrEmpty(ageCategory))
+            {
+                var borders = GetBorders(ageCategory);
                 query = query.Where(x => (now.Year - x.Registration.Runner.DateOfBirth.Value.Year) >= borders.From &&
                                          (now.Year - x.Registration.Runner.DateOfBirth.Value.Year) < borders.To);
+            }
 
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -195,7 +201,7 @@ namespace Backend.Controllers
                         query = query.OrderBy(x => x.Registration.Runner.Email);
                         break;
                     case "RaceTime":
-                        query = query.OrderBy(x => x.RaceTime).Where(x => x.RaceTime.HasValue && x.RaceTime > 0);
+                        query = query.Where(x => x.RaceTime.HasValue && x.RaceTime.Value > 0).OrderBy(x => x.RaceTime.Value);
                         break;
                     case "RegisterStatus":
                         query = query.OrderBy(x => x.Registration.RegistrationStatus.RegistrationStatus1);
@@ -206,11 +212,11 @@ namespace Backend.Controllers
             var runnersResult = await query.AsNoTracking()
                                            .ToListAsync();
 
-            return new
+            return new RaceResults
             {
                 TotalRunners = runnersResult.Count,
-                TotalRunnersFinished = runnersResult.Count(x => x.RaceTime.HasValue),
-                AvgRaceTime = runnersResult.Where(x => x.RaceTime.HasValue)
+                TotalRunnersFinished = runnersResult.Count(x => x.RaceTime.HasValue && x.RaceTime.Value != 0),
+                AvgRaceTime = runnersResult.Where(x => x.RaceTime.HasValue && x.RaceTime.Value != 0)
                                            .Average(x => x.RaceTime) ?? 0,
                 Runners = runnersResult
             };
@@ -243,15 +249,17 @@ namespace Backend.Controllers
                 return BadRequest();
             }
 
-            _context.Attach(runner);
-            _context.Entry(runner).Reference(x => x.EmailNavigation).IsModified = true;
-            _context.Entry(runner).Reference(x => x.CountryCodeNavigation).IsModified = true;
-            _context.Entry(runner).State = EntityState.Modified;
+            var runnerFinded = await _context.Runner.Include(x => x.EmailNavigation)
+                                                    .AsNoTracking()
+                                                    .SingleOrDefaultAsync(x => x.RunnerId == runner.RunnerId);
+
+            runnerFinded.EmailNavigation = runner.EmailNavigation;
+            runnerFinded.DateOfBirth = runner.DateOfBirth;
+            runnerFinded.Gender = runner.Gender;
+            runnerFinded.CountryCode = runner.CountryCode;
 
             try
             {
-                _context.User.Update(runner.EmailNavigation);
-                _context.Country.Update(runner.CountryCodeNavigation);
                 _context.Runner.Update(runner);
                 await _context.SaveChangesAsync();
             }

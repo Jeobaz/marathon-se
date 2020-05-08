@@ -114,7 +114,7 @@
                         {
                             <h3>Loading data...</h3>
                         }
-                        else if (raceResults.Runners.Count > 0)
+                        else if (raceResults.Runners != null && raceResults.Runners.Count > 0)
                         {
                             <table class="table table-bordered table-striped">
                                 <thead class="bg-mid-grey black-text">
@@ -199,8 +199,8 @@
 
     private string ageCategoryId = "U18";
 
-    private RaceResultsViewModel _raceResultsView = new RaceResultsViewModel();
-    public RaceResultsViewModel raceResults
+    private RaceResults _raceResultsView = new RaceResults();
+    public RaceResults raceResults
     {
         get => _raceResultsView;
         set
@@ -238,7 +238,7 @@
         Marathons.Reverse();
         EventTypes = await Http.GetJsonAsync<List<EventType>>($"{config.Value.Domain}/api/EventTypes/");
 
-        raceResults = await Http.GetJsonAsync<RaceResultsViewModel>(
+        raceResults = await Http.GetJsonAsync<RaceResults>(
             $"{config.Value.Domain}/api/Runners/filter?marathonId={marathonId}&" +
             $"eventTypeId={eventTypeId}&" +
             $"genderId={selectedGender}&" +
@@ -258,11 +258,12 @@
     public async Task Filtering()
     {
         raceResults = null;
-        raceResults = await Http.GetJsonAsync<RaceResultsViewModel>(
+        raceResults = await Http.GetJsonAsync<RaceResults>(
             $"{config.Value.Domain}/api/Runners/filter?marathonId={marathonId}&" +
             $"eventTypeId={eventTypeId}&" +
             $"genderId={selectedGender}&" +
-            $"ageCategory={ageCategoryId}"
+            $"ageCategory={ageCategoryId}&" +
+            $"sortBy=RaceTime"
             );
     }
 }

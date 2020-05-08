@@ -1,16 +1,15 @@
-﻿using Backend.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Frontend.ViewModels
+namespace Backend.Models
 {
-    public class RaceResultsViewModel
+    public class RaceResults
     {
         public int TotalRunners { get; set; }
         public int TotalRunnersFinished { get; set; }
-        public double? AvgRaceTime { get; set; }
+        public double AvgRaceTime { get; set; }
         public List<RegistrationEvent> Runners { get; set; }
     }
 }
