@@ -17,7 +17,11 @@
 <!-- Modal -->
 
 <Header />
-
+<style>
+    body{
+        margin-bottom: 100px !important;
+    }
+</style>
 <!-- Main Container -->
 <main>
     <div class="justify-content-center align-items-center bg-white">
@@ -101,7 +105,7 @@
                                     <InputText @bind-Value="Sponsor.ExpiryDate.Year" class="form-control" placeholder="@DateTime.Now.Year" />
                                 </div>
                                 <!-- CVC -->
-                                <div class="form-group input-group">
+                                <div class="form-group input-group mt-3">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text md-addon">CVC: </span>
                                     </div>
@@ -143,8 +147,8 @@
                                     </button>
                                 </div>
                                 @* href="SponsorshipConfirmation.html" *@
-                                <div class="container justify-content-center row mx-0">
-                                    <button type="submit" class="btn btn-md btn-light">
+                                <div class="container justify-content-center row mx-0 mt-3">
+                                    <button type="submit" class="btn btn-md btn-light mr-2">
                                         Pay now
                                     </button>
                                     <a type="button" class="btn btn-md btn-light" href="/">Cancel</a>
@@ -199,7 +203,7 @@
             ExpiryDate = new Models.ExpiryDate()
         };
 
-        //await JSRuntime.InvokeVoidAsync("setTitle", "Sponsor runner");
+        await JSRuntime.InvokeVoidAsync("setTitle", "Sponsor runner");
 
         allRunners = new List<Runner>();
         allRunners = await Http.GetJsonAsync<List<Runner>>($"{config.Value.Domain}/api/Runners/regrunners/");

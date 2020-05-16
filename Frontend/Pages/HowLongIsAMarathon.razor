@@ -6,6 +6,11 @@
 <Header />
 <!-- Main Container -->
 <main>
+    <style>
+        body {
+            margin-bottom: 100px !important;
+        }
+    </style>
     <div class="justify-content-center align-items-center bg-white">
         <div class="container-fluid">
             <div class="container text-center col-xl-10 col-md-8 col-lg-8 col-xl-8">
@@ -13,12 +18,12 @@
             </div>
             <div class="row mt-4">
                 <!-- Buffer column -->
-                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
-                <div class="col-sm-12 col-md-10 col-lg-8 col-xl-8">
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
+                <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8">
                     <div class="row">
                         @if (CurrentElement != null)
                         {
-                            <div class="col-sm-12 col-md-12 col-lg-5 col-xl-5 text-center">
+                            <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 text-center">
                                 <!--TEXT BLOCK-->
                                 <p class="text-center font-weight-bold h1 dark-grey" id='lead'>
                                     @CurrentElement.Name
@@ -29,8 +34,7 @@
                                 </p>
                             </div>
                         }
-                        <div class="col-sm-0 col-md-0 col-lg-0 col-xl-2"></div>
-                        <div class="col-sm-12 col-md-12 col-lg-7 col-xl-5 text-center">
+                        <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 text-center">
                             <ul class="nav nav-tabs nav-justified md-tabs bg-mid-grey" id="myTabJust"
                                 role="tablist">
                                 <li class="nav-item">
@@ -43,7 +47,7 @@
                                 </li>
                             </ul>
                             <div class="tab-content card pt-5">
-                                <div class="tab-pane fade show active tabs" id="speed" role="tabpanel"
+                                <div class="tab-pane fade show active tabs mx-auto" id="speed" role="tabpanel"
                                      aria-labelledby="speed-tab">
                                     @foreach (var spdEl in SpeedData)
                                     {
@@ -70,7 +74,7 @@
                     </div>
                 </div>
                 <!-- Buffer column -->
-                <div class="col-sm-0 col-md-1 col-lg-2 col-xl-2"></div>
+                <div class="col-sm-0 col-md-1 col-lg-1 col-xl-2"></div>
             </div>
         </div>
     </div>

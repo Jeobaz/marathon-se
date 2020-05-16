@@ -1,6 +1,6 @@
 ﻿@page "/volunteermanagement"
 
-@attribute [Authorize(Roles = "A")]
+@*@attribute [Authorize(Roles = "A")]*@
 @using Microsoft.Extensions.Options
 @using Frontend.Data
 @using Frontend.Services
@@ -32,7 +32,7 @@
                                 }
                             </select>
                         </div>
-                        <div class="form-group input-group mx-0 my-0 justify-content-center">
+                        <div class="form-group input-group mx-0 my-0 justify-content-center mt-3">
                             <div class="input-group-prepend mr-3">
                                 <button type="button" class="btn btn-sm btn-light mb-2" @onclick="RefreshTable">Refresh</button>
                             </div>
