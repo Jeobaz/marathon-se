@@ -31,6 +31,7 @@ namespace Backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<marathonseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<marathonseContext>(options => options.UseSqlServer());
             services.AddControllers();
             services.AddMvc(option => option.EnableEndpointRouting = false)
                     .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)

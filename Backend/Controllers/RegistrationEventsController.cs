@@ -95,11 +95,30 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<RegistrationEvent>> PostRegistrationEvent(RegistrationEvent registrationEvent)
         {
-            _context.RegistrationEvent.Add(registrationEvent);
-            await _context.SaveChangesAsync();
+            var currentCountPacitipants = await _context.Event.CountAsync(x => x.EventId == registrationEvent.EventId);
+            var currentEvent = await _context.Event.SingleOrDefaultAsync(x => x.EventId == registrationEvent.EventId);
+
+            if (currentCountPacitipants + 1 < currentEvent.MaxParticipants)
+            {
+                _context.RegistrationEvent.Add(registrationEvent);
+                await _context.SaveChangesAsync();
+            }
+            else
+                return Problem(detail: "MaxParticipants", statusCode: 404);
 
             return CreatedAtAction("GetRegistrationEvent", new { id = registrationEvent.RegistrationEventId }, registrationEvent);
         }
+        // POST: api/RegistrationEvents/accepttoregister
+        [HttpPost("accepttoregister")]
+        public async Task<ActionResult<bool>> AcceptToRegistrationEvent(RegistrationEvent registrationEvent)
+        {
+            var currentCountPacitipants = await _context.Event.CountAsync(x => x.EventId == registrationEvent.EventId);
+            var currentEvent = await _context.Event.SingleOrDefaultAsync(x => x.EventId == registrationEvent.EventId);
+
+
+            return currentCountPacitipants + 1 < currentEvent.MaxParticipants;
+        }
+
         // POST: api/RegistrationEvents/lastbibnumber
         [HttpPost("lastbibnumber")]
         public async Task<ActionResult<short>> PostGetBibNumber([FromBody] string eventId)

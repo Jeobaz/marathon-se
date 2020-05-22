@@ -128,14 +128,16 @@
 
         if (findedSpeedEl != null)
         {
+            var time = TimeSpan.FromMinutes(42d * 60 / findedSpeedEl.Speed);
             CurrentElement = new
             {
                 Picture = findedSpeedEl.Picture,
                 Name = findedSpeedEl.Name,
-                Text = string.Format("The top speed of a {0} is {1}. It would take {2:%h}h {2:%m}m {2:%s}s to complete a 42km marathon.",
+                Text = string.Format("The top speed of a {0} is {1}. It would take {2}h {3:%m}m {3:%s}s to complete a 42km marathon.",
                                      findedSpeedEl.Name,
                                      findedSpeedEl.Speed,
-                                     TimeSpan.FromMinutes(42d * 60 / findedSpeedEl.Speed))
+                                     (int)time.TotalHours,
+                                     time)
             };
         }
 

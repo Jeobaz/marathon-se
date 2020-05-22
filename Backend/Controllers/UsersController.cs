@@ -49,7 +49,7 @@ namespace Backend.Controllers
             return user;
         }
 
-        // GET: api/Users/email/
+        // POST: api/Users/email/
         [HttpPost("email")]
         public async Task<ActionResult<User>> GetUserByEmail([FromBody] string email)
         {

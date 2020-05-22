@@ -229,6 +229,7 @@ namespace Backend.Controllers
         {
             var runner = await _context.Runner.Include(x => x.EmailNavigation)
                                               .Include(x => x.Registration)
+                                                    //.ThenInclude(x => x.RegistrationEvent)
                                               .AsNoTracking()
                                               .SingleOrDefaultAsync(x => x.Email == email);
 

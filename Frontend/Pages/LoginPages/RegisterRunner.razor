@@ -29,6 +29,7 @@
                 @*<div class="col-sm-12 col-md-10 col-lg-10 col-xl-8">*@
                 <div class="row">
                     <EditForm Model="runnerView" OnValidSubmit="ValidRegister">
+                        <h3>@Message</h3>
                         <DataAnnotationsValidator />
                         <ValidationSummary />
                         <div class="text-center">
@@ -144,6 +145,7 @@
 <!-- /Main Container -->
 
 @code {
+    string Message;
     private RegisterRunnerView runnerView;
     private List<Gender> _genders;
     private List<Country> _countries;
@@ -211,16 +213,25 @@
             Gender = runnerView.GenderId,
             CountryCode = runnerView.CountryId
         };
+        var containsRunner = await runnerService.GetRunnerByEmail(runnerView.Email);
+        if (containsRunner.Email == null)
+        {
+            Message = string.Empty;
+            var returnedRunner = await runnerService.RegisterRunnerAsync(registeredRunner);
 
-        var returnedRunner = await runnerService.RegisterRunnerAsync(registeredRunner);
+            await sessionStorage.SetItemAsync("email", registeredRunner.Email);
+            //await sessionStorage.SetItemAsync("role", registeredRunner.EmailNavigation.RoleId);
 
-        await sessionStorage.SetItemAsync("email", registeredRunner.Email);
-        //await sessionStorage.SetItemAsync("role", registeredRunner.EmailNavigation.RoleId);
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(registeredRunner.Email, registeredRunner.EmailNavigation.RoleId);
 
-        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(registeredRunner.Email, registeredRunner.EmailNavigation.RoleId);
+            NavigationManager.NavigateTo("/registerforevent");
 
-        NavigationManager.NavigateTo("/registerforevent");
-
-        return await Task.FromResult(true);
+            return await Task.FromResult(true);
+        }
+        else
+        {
+            Message = "A runner with this Email Address is already registered";
+            return await Task.FromResult(false);
+        }
     }
 }

@@ -42,6 +42,7 @@ namespace Frontend
             services.AddSingleton<IRunnerService, RunnerService>();
             services.AddSingleton<ICharityService, CharityService>();
             services.AddSingleton<IVolunteerService, VolunteerService>();
+            services.AddSingleton<IRegistrationEventService, RegistrationEventService>();
             services.AddBlazoredModal();
             services.AddFileReaderService();
         }
