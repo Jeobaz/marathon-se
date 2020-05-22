@@ -19,9 +19,6 @@ PM> Update-Database
 
 Complete! Launch Backend and Frontend projects.
 
-# Demo
-[marathon-se.azurewebsites.net](https://marathon-se.azurewebsites.net/)
-
 # Pages links
 
 Access to the page is shared by component `AuthorizeView`
@@ -55,3 +52,19 @@ To access all pages from the columns except the first, you need to log in from a
 | [15. How long?](https://marathon-se.azurewebsites.net/howlongisamarathon)  |
 | [33. BMI Calculator](https://marathon-se.azurewebsites.net/bmicalculator)  |
 | [34. BMR Calculator](https://marathon-se.azurewebsites.net/bmrcalculator)  |
+
+# Endpoint
+
+User:
+* Get all users - [api/Users/](https://backend-marathon-se.azurewebsites.net/api/Users/) (Method: `GET`, Query param: `None`, Data objects: `None`, Return: `List<User>`)
+* Get user by id - [api/Users/5](https://backend-marathon-se.azurewebsites.net/api/Users/5) (Method: `GET`, Query param: *`UserId`, Return: `User`)
+* Get user by email - [api/Users/email/](https://backend-marathon-se.azurewebsites.net/api/Users/email/) (Method: `POST`, Query param: `None`, Data objects: `email`, Return: `User`)
+* Get user by token - [api/Users/user_by_token/](https://backend-marathon-se.azurewebsites.net/api/Users/user_by_token/) (Method: `POST`, Query param: `None`, Data objects: `token`, Return: `User`)
+* Get token by user - [api/Users/token_by_user/](https://backend-marathon-se.azurewebsites.net/api/Users/token_by_user/) (Method: `POST`, Query param: `None`, Data objects: `User`, Return: `token`)
+* Login user - [api/Users/Login/](https://backend-marathon-se.azurewebsites.net/api/Users/Login/) (Method: `POST`, Query param: `None`, Data objects: `User`, Return: `UserWithToken`)
+* Register user - [api/Users/Register/](https://backend-marathon-se.azurewebsites.net/api/Users/Register/) (Method: `POST`, Query param: `None`, Data objects: `User`, Return: `UserWithToken`)
+* Filter users - [api/Users/filter?sortBy=LastName&role=R&search=john](https://backend-marathon-se.azurewebsites.net/api/Users/filter?sortBy=LastName&role=R&search=john) (Method: `GET`, Query param: [`sortBy`, `role`, `search`], Data objects: `None`, Return: `List<User>`)
+
+# Demo
+Frontend - [marathon-se.azurewebsites.net](https://marathon-se.azurewebsites.net/)
+Backend - [backend-marathon-se.azurewebsites.net](https://backend-marathon-se.azurewebsites.net/)
